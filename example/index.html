@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swiss Ephemeris: Sun Position</title>
+</head>
+<body>
+    <h1>Calculate Sun Position with Swiss Ephemeris</h1>
+    <button id="calculate-button">Calculate</button>
+    <div id="output"></div>
+
+    <script 
+        type="module"
+    >
+        import Swisseph from './src/swisseph.js';
+        const swe = new Swisseph();
+        swe.initSwissEph()
+        // Function to get the current date details
+        function getCurrentDateComponents() {
+            const now = new Date();
+            return {
+                year: now.getUTCFullYear(),
+                month: now.getUTCMonth() + 1, // JavaScript months are 0-based
+                day: now.getUTCDate(),
+                hour: now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600
+            };
+        }
+        document.getElementById('calculate-button')
+        .addEventListener('click', () => {
+            const { year, month, day, hour } = getCurrentDateComponents();
+            const jd = swe.julday(year, month, day, hour);
+           console.log("jd", jd);
+        })
+        // // Initialize Swiss Ephemeris
+        // Swisseph().then((Module) => {
+        //      // Set the path to the ephemeris files in the virtual file system
+        //      const setPath=  Module.ccall(
+        //             'swe_set_ephe_path', 
+        //             'string', // Return type
+        //             ['string'], // Argument type
+        //             ["/sweph"] // Argument value
+        //         );
+
+        //     console.log(`Ephemeris path set to: ${setPath}`);
+        //     document.getElementById('calculate-button').addEventListener('click', () => {
+        //         const { year, month, day, hour } = getCurrentDateComponents();
+
+        //         // Compute Julian Day using swe_julday
+        //         const julianDay = Module.ccall(
+        //             'swe_julday',  // Function name in the Swiss Ephemeris library
+        //             'number',      // Return type
+        //             ['number', 'number', 'number', 'number', 'number'], // Argument types
+        //             [year, month, day, hour, 1] // Arguments: year, month, day, hour, Gregorian flag
+        //         );
+
+        //         // Allocate memory for swe_calc_ut result
+        //         const resultPtr = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT); // Allocate memory for 6 doubles
+        //         const ipl = 0; // Sun's planet ID
+        //         const iflag = 2; // SEFLG_SWIEPH flag
+
+        //         // Compute Sun position using swe_calc_ut
+        //         const calcResult = Module.ccall(
+        //             'swe_calc_ut', // Function name in the Swiss Ephemeris library
+        //             'number',      // Return type
+        //             ['number', 'number', 'number', 'number'], // Argument types
+        //             [julianDay, ipl, iflag, resultPtr] // Arguments: julianDay, ipl, iflag, resultPtr
+        //         );
+
+        //         if (calcResult < 0) {
+        //             document.getElementById('output').innerHTML = `<p>Error: Could not calculate Sun position.</p>`;
+        //             return;
+        //         }
+
+        //         // Extract results from memory
+        //         const resultArray = new Float64Array(Module.HEAPF64.buffer, resultPtr, 6);
+        //         const [longitude, latitude, distance, lonSpeed, latSpeed, distSpeed] = resultArray;
+
+        //         // Free allocated memory
+        //         Module._free(resultPtr);
+
+        //         // Display results
+        //         document.getElementById('output').innerHTML = `
+        //             <p>Current Julian Day: ${julianDay.toFixed(6)}</p>
+        //             <p>Sun Position:</p>
+        //             <ul>
+        //                 <li>Longitude: ${longitude.toFixed(6)}°</li>
+        //                 <li>Latitude: ${latitude.toFixed(6)}°</li>
+        //                 <li>Distance: ${distance.toFixed(6)} AU</li>
+        //                 <li>Longitude Speed: ${lonSpeed.toFixed(6)}°/day</li>
+        //                 <li>Latitude Speed: ${latSpeed.toFixed(6)}°/day</li>
+        //                 <li>Distance Speed: ${distSpeed.toFixed(6)} AU/day</li>
+        //             </ul>
+        //         `;
+        //     });
+        // }).catch((error) => {
+        //     console.error("Failed to load Swiss Ephemeris module:", error);
+        // });
+    </script>
+</body>
+</html>
