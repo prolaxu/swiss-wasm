@@ -2,40 +2,105 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Birth Chart Calculation (Drik Siddhanta)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
-<body>
-    <h1>Calculate Birth Chart with Drik Siddhanta</h1>
-
-    <div>
-        <label for="birthdate">Enter Birth Date (YYYY-MM-DD):</label>
-        <input type="date" id="birthdate" required />
+<body class="bg-gray-100 p-4">
+    <div id="app" class="flex  items-center">
+        <div class="bg-white p-4 rounded">
+            <div class="text-2xl font-bold mb-4">Birth Chart Calculation (Drik Siddhanta)</div>
+            <div class=" px-2 ">
+                <div>
+                    <label for="birthdate" class="block">Enter Birth Date:</label>
+                    <input v-model="birthdate" type="date" id="birthdate" class="border border-gray-300 p-2 rounded mb-2">
+                </div>
+                <div>
+                    <label for="birthtime" class="block">Enter Birth Time:</label>
+                    <input v-model="birthtime" type="time" id="birthtime" class="border border-gray-300 p-2 rounded mb-2">
+                </div>
+                <div>
+                    <label for="timezone" class="block">Enter Time Zone Offset:</label>
+                    <input v-model="timezone" type="number" id="timezone" class="border border-gray-300 p-2 rounded mb-2">
+                </div>
+            </div>
+            <button @click="calculateChart" class="bg-blue-500 text-white p-2 rounded mt-2">Calculate Birth Chart</button>
+            
+        </div>
+       <div class="m-4 bg-white p-4 rounded" v-if="chart">
+            <h2 class="text-2xl">Planetary Positions (Drik Siddhanta)</h2>
+            <ul class="p-2">
+                <li v-for="(position, planet) in chart" :key="planet"><strong>{{ planet }}:</strong> {{ position }}°</li>
+            </ul>
+        </div>
+        
     </div>
-    <div>
-        <label for="birthtime">Enter Birth Time (HH:MM):</label>
-        <input type="time" id="birthtime" required />
-    </div>
-    <div>
-        <label for="timezone">Enter Time Zone Offset (e.g., +5.5 for IST):</label>
-        <input type="number" id="timezone" step="0.5" required />
-    </div>
-
-    <!-- Display current date, time, and timezone -->
-    <div>
-        <h3>Current UTC Date and Time</h3>
-        <p id="current-date-time"></p>
-        <p id="current-timezone"></p>
-    </div>
-
-    <button id="calculate-button">Calculate Birth Chart</button>
-    <div id="output"></div>
 
     <script type="module">
-        import Swisseph from '/src/swisseph.js';
-        const swe = new Swisseph();
-        await swe.initSwissEph();  // Ensure Swiss Ephemeris is initialized
+    const { createApp, ref } = Vue
+    import Swisseph from '/src/swisseph.js';
 
+    createApp({
+        setup() {
+            const swe = new Swisseph();
+            const birthdate = ref(null)
+            const birthtime = ref(null)
+            const timezone = ref(null)
+            const chart = ref(null)
+
+            const initDefaults =async () => {
+                await swe.initSwissEph();  // Ensure Swiss Ephemeris is initialized
+                const now = new Date()
+                const year = now.getFullYear()
+                const month = String(now.getMonth() + 1).padStart(2, '0')
+                const day = String(now.getDate()).padStart(2, '0')
+                const hour = String(now.getHours()).padStart(2, '0')
+                const minute = String(now.getMinutes()).padStart(2, '0')
+                birthdate.value = `${year}-${month}-${day}`
+                birthtime.value = `${hour}:${minute}`
+                timezone.value = now.getTimezoneOffset() / 60
+            }
+            
+            const calculateChart = () => {
+                console.log('Calculating birth chart...');
+                const year = Number(birthdate.value.split('-')[0]);
+                const month = Number(birthdate.value.split('-')[1]);
+                const day = Number(birthdate.value.split('-')[2]);
+                const [hour, minute] = birthtime.value.split(':').map(Number);
+                const correctedTime = hour + minute / 60 - timezone.value;
+                const jd = swe.julday(year, month, day, correctedTime);
+               
+                const planets = [swe.SE_SUN, swe.SE_MOON, swe.SE_MERCURY, swe.SE_VENUS, swe.SE_MARS, swe.SE_JUPITER, swe.SE_SATURN];
+                const planetNames = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"];
+                const chartData = {};
+
+                for (let i = 0; i < planets.length; i++) {
+                    const planet = planets[i];
+                    const planetName = planetNames[i];
+                    const result = swe.calc_ut(jd, planet, swe.SEFLG_SIDEREAL);
+                    const position = result ? result[0] : 'Error calculating position';
+                    chartData[planetName] = position;
+                }
+                chart.value = chartData;
+            }
+            
+            initDefaults()
+            const message = ref('Hello vue!')
+            return {
+                message,
+                birthdate,
+                birthtime,
+                timezone,
+                chart,
+                calculateChart
+            }
+        }
+    }).mount('#app')
+    </script>
+    <!-- <script type="module">
+        
         // Function to get current date and time in UTC, and the time zone offset
         function getCurrentDateTime() {
             const now = new Date();
@@ -100,6 +165,6 @@
             output += `</ul>`;
             document.getElementById('output').innerHTML = output;
         });
-    </script>
+    </script> -->
 </body>
 </html>
