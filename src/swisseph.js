@@ -281,7 +281,7 @@ class SwissEph {
   // Initializes the Swiss Ephemeris WebAssembly module
   async initSwissEph() {
     this.SweModule = await WasamSwissEph();
-    this.SweModule.set_ephe_path('sweph');
+    this.set_ephe_path('sweph');
   }
 
   set_ephe_path(path) {
@@ -297,7 +297,10 @@ class SwissEph {
   }
 
   calc_ut(julianDay, body, flags) {
-    const result = this.SweModule.ccall('swe_calc_ut', 'number', ['number', 'number', 'number'], [julianDay, body, flags]);
+    const buffer = this.SweModule._malloc(4 * Float64Array.BYTES_PER_ELEMENT);
+    this.SweModule.ccall('swe_calc_ut', 'number', ['number', 'number', 'number','pointer'], [julianDay, body, flags,buffer]);
+    const result = new Float64Array(this.SweModule.HEAPF64.buffer, buffer, 4);
+    this.SweModule._free(buffer);
     return result;
   }
 

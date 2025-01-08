@@ -3,99 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Swiss Ephemeris: Sun Position</title>
+    <title>Birth Chart Calculation (Drik Siddhanta)</title>
 </head>
 <body>
-    <h1>Calculate Sun Position with Swiss Ephemeris</h1>
-    <button id="calculate-button">Calculate</button>
+    <h1>Calculate Birth Chart with Drik Siddhanta</h1>
+
+    <div>
+        <label for="birthdate">Enter Birth Date (YYYY-MM-DD):</label>
+        <input type="date" id="birthdate" required />
+    </div>
+    <div>
+        <label for="birthtime">Enter Birth Time (HH:MM):</label>
+        <input type="time" id="birthtime" required />
+    </div>
+    <div>
+        <label for="timezone">Enter Time Zone Offset (e.g., +5.5 for IST):</label>
+        <input type="number" id="timezone" step="0.5" required />
+    </div>
+
+    <!-- Display current date, time, and timezone -->
+    <div>
+        <h3>Current UTC Date and Time</h3>
+        <p id="current-date-time"></p>
+        <p id="current-timezone"></p>
+    </div>
+
+    <button id="calculate-button">Calculate Birth Chart</button>
     <div id="output"></div>
 
-    <script 
-        type="module"
-    >
-        import Swisseph from './src/swisseph.js';
+    <script type="module">
+        import Swisseph from '/src/swisseph.js';
         const swe = new Swisseph();
-        swe.initSwissEph()
-        // Function to get the current date details
-        function getCurrentDateComponents() {
+        await swe.initSwissEph();  // Ensure Swiss Ephemeris is initialized
+
+        // Function to get current date and time in UTC, and the time zone offset
+        function getCurrentDateTime() {
             const now = new Date();
-            return {
-                year: now.getUTCFullYear(),
-                month: now.getUTCMonth() + 1, // JavaScript months are 0-based
-                day: now.getUTCDate(),
-                hour: now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600
-            };
+            const utcDate = now.toUTCString(); // Current UTC date and time
+            const timezoneOffset = now.getTimezoneOffset() / 60; // Time zone offset in hours (negative for east of UTC)
+            const timezoneDisplay = `UTC${timezoneOffset >= 0 ? '+' : ''}${timezoneOffset}`;
+            return { utcDate, timezoneDisplay };
         }
-        document.getElementById('calculate-button')
-        .addEventListener('click', () => {
-            const { year, month, day, hour } = getCurrentDateComponents();
-            const jd = swe.julday(year, month, day, hour);
-           console.log("jd", jd);
-        })
-        // // Initialize Swiss Ephemeris
-        // Swisseph().then((Module) => {
-        //      // Set the path to the ephemeris files in the virtual file system
-        //      const setPath=  Module.ccall(
-        //             'swe_set_ephe_path', 
-        //             'string', // Return type
-        //             ['string'], // Argument type
-        //             ["/sweph"] // Argument value
-        //         );
 
-        //     console.log(`Ephemeris path set to: ${setPath}`);
-        //     document.getElementById('calculate-button').addEventListener('click', () => {
-        //         const { year, month, day, hour } = getCurrentDateComponents();
+        // Display current UTC date, time, and time zone
+        const { utcDate, timezoneDisplay } = getCurrentDateTime();
+        document.getElementById('current-date-time').textContent = `Current UTC: ${utcDate}`;
+        document.getElementById('current-timezone').textContent = `Your Local Time Zone: ${timezoneDisplay}`;
 
-        //         // Compute Julian Day using swe_julday
-        //         const julianDay = Module.ccall(
-        //             'swe_julday',  // Function name in the Swiss Ephemeris library
-        //             'number',      // Return type
-        //             ['number', 'number', 'number', 'number', 'number'], // Argument types
-        //             [year, month, day, hour, 1] // Arguments: year, month, day, hour, Gregorian flag
-        //         );
+        // Function to get birth date and time components
+        function getBirthDetails() {
+            const birthdate = document.getElementById('birthdate').value;
+            const birthtime = document.getElementById('birthtime').value;
+            const timezoneOffset = parseFloat(document.getElementById('timezone').value);
 
-        //         // Allocate memory for swe_calc_ut result
-        //         const resultPtr = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT); // Allocate memory for 6 doubles
-        //         const ipl = 0; // Sun's planet ID
-        //         const iflag = 2; // SEFLG_SWIEPH flag
+            if (!birthdate || !birthtime || isNaN(timezoneOffset)) {
+                alert("Please enter valid birth details");
+                return null;
+            }
 
-        //         // Compute Sun position using swe_calc_ut
-        //         const calcResult = Module.ccall(
-        //             'swe_calc_ut', // Function name in the Swiss Ephemeris library
-        //             'number',      // Return type
-        //             ['number', 'number', 'number', 'number'], // Argument types
-        //             [julianDay, ipl, iflag, resultPtr] // Arguments: julianDay, ipl, iflag, resultPtr
-        //         );
+            const [year, month, day] = birthdate.split('-').map(Number);
+            const [hour, minute] = birthtime.split(':').map(Number);
 
-        //         if (calcResult < 0) {
-        //             document.getElementById('output').innerHTML = `<p>Error: Could not calculate Sun position.</p>`;
-        //             return;
-        //         }
+            // Convert birth time to hours, including minutes and timezone correction
+            const correctedTime = hour + minute / 60 - timezoneOffset;
 
-        //         // Extract results from memory
-        //         const resultArray = new Float64Array(Module.HEAPF64.buffer, resultPtr, 6);
-        //         const [longitude, latitude, distance, lonSpeed, latSpeed, distSpeed] = resultArray;
+            return { year, month, day, correctedTime };
+        }
 
-        //         // Free allocated memory
-        //         Module._free(resultPtr);
+        document.getElementById('calculate-button').addEventListener('click', async () => {
+            const birthDetails = getBirthDetails();
+            if (!birthDetails) return;
 
-        //         // Display results
-        //         document.getElementById('output').innerHTML = `
-        //             <p>Current Julian Day: ${julianDay.toFixed(6)}</p>
-        //             <p>Sun Position:</p>
-        //             <ul>
-        //                 <li>Longitude: ${longitude.toFixed(6)}°</li>
-        //                 <li>Latitude: ${latitude.toFixed(6)}°</li>
-        //                 <li>Distance: ${distance.toFixed(6)} AU</li>
-        //                 <li>Longitude Speed: ${lonSpeed.toFixed(6)}°/day</li>
-        //                 <li>Latitude Speed: ${latSpeed.toFixed(6)}°/day</li>
-        //                 <li>Distance Speed: ${distSpeed.toFixed(6)} AU/day</li>
-        //             </ul>
-        //         `;
-        //     });
-        // }).catch((error) => {
-        //     console.error("Failed to load Swiss Ephemeris module:", error);
-        // });
+            const { year, month, day, correctedTime } = birthDetails;
+            
+            // Calculate Julian day from the given birth details
+            const jd = swe.julday(year, month, day, correctedTime);
+            console.log("Julian Day:", jd);
+
+            // Define a list of planets to calculate their positions
+            const planets = [swe.SE_SUN, swe.SE_MOON, swe.SE_MERCURY, swe.SE_VENUS, swe.SE_MARS, swe.SE_JUPITER, swe.SE_SATURN];
+            const planetNames = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"];
+            let output = `<h2>Planetary Positions (Drik Siddhanta)</h2><ul>`;
+
+            for (let i = 0; i < planets.length; i++) {
+                const planet = planets[i];
+                const planetName = planetNames[i];
+                
+                // Calculate the position for each planet
+                const result = swe.calc_ut(jd, planet, swe.SEFLG_SIDEREAL); // Using sidereal flag for Drik Siddhanta
+            console.log("Result:", result);
+                const position = result ? result[0] : 'Error calculating position';
+                
+                output += `<li><strong>${planetName}:</strong> ${position}°</li>`;
+            }
+
+            output += `</ul>`;
+            document.getElementById('output').innerHTML = output;
+        });
     </script>
 </body>
 </html>
