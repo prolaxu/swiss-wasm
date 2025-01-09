@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Birth Chart Calculation (Drik Siddhanta)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="./vue.global.prod.js"></script>
 </head>
 <body class="bg-gray-100 p-4">
-    <div id="app" class="flex  items-center">
+    <div id="app" class="flex  items-center" style="display: none;">
         <div class="bg-white p-4 rounded">
             <div class="text-2xl font-bold mb-4">Birth Chart Calculation (Drik Siddhanta)</div>
             <div class=" px-2 ">
@@ -39,7 +39,7 @@
     </div>
 
     <script type="module">
-    const { createApp, ref } = Vue
+    const { createApp, ref,onMounted } = Vue
     import Swisseph from "../src/swisseph.js";
 
     createApp({
@@ -88,6 +88,9 @@
             
             initDefaults()
             const message = ref('Hello vue!')
+            onMounted(() => {
+                document.getElementById('app').style.display = 'block'
+            })
             return {
                 message,
                 birthdate,
