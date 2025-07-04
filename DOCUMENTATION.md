@@ -881,7 +881,7 @@ For issues and questions:
 
 ## Version History
 
-- v1.0.0: Initial release with core functionality
+- v0.0.1: Initial release with core functionality
 - Comprehensive test suite
 - Full WebAssembly integration
 - Modern ES6+ JavaScript API
