@@ -12,6 +12,23 @@ A high-precision JavaScript wrapper for the Swiss Ephemeris WebAssembly module, 
 - **Complete Documentation**: Extensive guides and examples
 - **Professional Grade**: Suitable for commercial applications
 
+## 📦 Installation
+
+### npm
+```bash
+npm install swisseph-wasm
+```
+
+### yarn
+```bash
+yarn add swisseph-wasm
+```
+
+### pnpm
+```bash
+pnpm add swisseph-wasm
+```
+
 ## 📦 What's Included
 
 - **Core Library** (`src/swisseph.js`) - Main JavaScript wrapper
@@ -20,13 +37,14 @@ A high-precision JavaScript wrapper for the Swiss Ephemeris WebAssembly module, 
 - **Documentation** - Complete API reference and guides
 - **Examples** - Practical usage examples and patterns
 - **Quick Reference** - Handy developer reference
+- **TypeScript Definitions** - Full type support
 
 ## 🚀 Quick Start
 
 ### Basic Usage
 
 ```javascript
-import SwissEph from './src/swisseph.js';
+import SwissEph from 'swisseph-wasm';
 
 // Create and initialize
 const swe = new SwissEph();
@@ -45,7 +63,10 @@ swe.close();
 ### Birth Chart Example
 
 ```javascript
-import { BirthChartCalculator } from './examples/birth-chart.js';
+import SwissEph from 'swisseph-wasm';
+
+// You can also import the example calculator
+// import { BirthChartCalculator } from 'swisseph-wasm/examples/birth-chart.js';
 
 const calculator = new BirthChartCalculator();
 

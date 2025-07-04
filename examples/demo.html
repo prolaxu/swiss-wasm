@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwissEph WebAssembly Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cosmic: {
+                            50: '#f0f9ff',
+                            500: '#3b82f6',
+                            900: '#1e3a8a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .planet-symbol { font-size: 1.2em; }
+        .loading { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-6 shadow-lg">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl font-bold text-center mb-2">🌟 SwissEph WebAssembly Demo</h1>
+            <p class="text-center text-blue-100">Interactive Swiss Ephemeris Calculator</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Loading Indicator -->
+        <div id="loading" class="text-center py-8">
+            <div class="loading inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+            <p class="mt-2 text-gray-600">Loading Swiss Ephemeris...</p>
+        </div>
+
+        <!-- Main App (hidden initially) -->
+        <div id="app" class="hidden">
+            <!-- Navigation Tabs -->
+            <div class="mb-8">
+                <nav class="flex space-x-1 bg-white rounded-lg p-1 shadow-md">
+                    <button onclick="showTab('current')" id="tab-current" class="tab-button active">Current Positions</button>
+                    <button onclick="showTab('birth')" id="tab-birth" class="tab-button">Birth Chart</button>
+                    <button onclick="showTab('compare')" id="tab-compare" class="tab-button">Sidereal vs Tropical</button>
+                    <button onclick="showTab('time')" id="tab-time" class="tab-button">Time Functions</button>
+                </nav>
+            </div>
+
+            <!-- Current Positions Tab -->
+            <div id="tab-content-current" class="tab-content">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">🌍 Current Planetary Positions</h2>
+                    <p class="text-gray-600 mb-4">Real-time positions of planets as seen from Earth</p>
+                    
+                    <button onclick="calculateCurrentPositions()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mb-4 transition-colors">
+                        Calculate Now
+                    </button>
+                    
+                    <div id="current-results" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="current-planets"></div>
+                        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                            <p class="text-sm text-gray-600" id="current-timestamp"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Birth Chart Tab -->
+            <div id="tab-content-birth" class="tab-content hidden">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">🎂 Birth Chart Calculator</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Birth Date</label>
+                            <input type="date" id="birth-date" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Birth Time</label>
+                            <input type="time" id="birth-time" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Timezone Offset (hours from UTC)</label>
+                            <input type="number" id="birth-timezone" value="0" min="-12" max="12" step="0.5" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Coordinate System</label>
+                            <select id="birth-system" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="tropical">Tropical</option>
+                                <option value="sidereal">Sidereal (Lahiri)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button onclick="calculateBirthChart()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg mb-4 transition-colors">
+                        Calculate Birth Chart
+                    </button>
+                    
+                    <div id="birth-results" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="birth-planets"></div>
+                        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                            <p class="text-sm text-gray-600" id="birth-info"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidereal vs Tropical Tab -->
+            <div id="tab-content-compare" class="tab-content hidden">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">⚖️ Sidereal vs Tropical Comparison</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                            <input type="date" id="compare-date" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Time (UTC)</label>
+                            <input type="time" id="compare-time" value="12:00" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Planet</label>
+                            <select id="compare-planet" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="0">Sun ☉</option>
+                                <option value="1">Moon ☽</option>
+                                <option value="2">Mercury ☿</option>
+                                <option value="3">Venus ♀</option>
+                                <option value="4">Mars ♂</option>
+                                <option value="5">Jupiter ♃</option>
+                                <option value="6">Saturn ♄</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button onclick="comparePositions()" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg mb-4 transition-colors">
+                        Compare Positions
+                    </button>
+                    
+                    <div id="compare-results" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                                <h3 class="font-bold text-orange-800 mb-2">🌞 Tropical Position</h3>
+                                <div id="tropical-result" class="text-lg"></div>
+                            </div>
+                            <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <h3 class="font-bold text-blue-800 mb-2">⭐ Sidereal Position</h3>
+                                <div id="sidereal-result" class="text-lg"></div>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                                <div>
+                                    <p class="text-sm text-gray-600">Ayanamsa (Lahiri)</p>
+                                    <p class="text-lg font-bold" id="ayanamsa-value"></p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Difference</p>
+                                    <p class="text-lg font-bold" id="difference-value"></p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Julian Day</p>
+                                    <p class="text-lg font-bold" id="julian-day-value"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Functions Tab -->
+            <div id="tab-content-time" class="tab-content hidden">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">⏰ Time & Date Functions</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                            <input type="date" id="time-date" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Time (UTC)</label>
+                            <input type="time" id="time-time" value="12:00" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    
+                    <button onclick="calculateTimeFunctions()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-2 rounded-lg mb-4 transition-colors">
+                        Calculate Time Functions
+                    </button>
+                    
+                    <div id="time-results" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <h3 class="font-bold text-blue-800 mb-2">Julian Day</h3>
+                                <p class="text-lg" id="julian-day"></p>
+                            </div>
+                            <div class="p-4 bg-green-50 rounded-lg">
+                                <h3 class="font-bold text-green-800 mb-2">Sidereal Time</h3>
+                                <p class="text-lg" id="sidereal-time"></p>
+                            </div>
+                            <div class="p-4 bg-purple-50 rounded-lg">
+                                <h3 class="font-bold text-purple-800 mb-2">Delta T</h3>
+                                <p class="text-lg" id="delta-t"></p>
+                            </div>
+                            <div class="p-4 bg-yellow-50 rounded-lg">
+                                <h3 class="font-bold text-yellow-800 mb-2">Day of Week</h3>
+                                <p class="text-lg" id="day-of-week"></p>
+                            </div>
+                            <div class="p-4 bg-red-50 rounded-lg">
+                                <h3 class="font-bold text-red-800 mb-2">Calendar Date</h3>
+                                <p class="text-lg" id="calendar-date"></p>
+                            </div>
+                            <div class="p-4 bg-indigo-50 rounded-lg">
+                                <h3 class="font-bold text-indigo-800 mb-2">Swiss Eph Version</h3>
+                                <p class="text-lg" id="version-info"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Display -->
+        <div id="error-display" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <h3 class="text-red-800 font-bold mb-2">Error</h3>
+            <p id="error-message" class="text-red-700"></p>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-gray-500">
+            <p>Powered by Swiss Ephemeris WebAssembly | 
+               <a href="https://github.com/your-repo/swiss-wasm" class="text-blue-500 hover:underline">View on GitHub</a>
+            </p>
+        </footer>
+    </div>
+
+    <script type="module">
+        import SwissEph from '../src/swisseph.js';
+        
+        let swe = null;
+        let initialized = false;
+
+        // Initialize Swiss Ephemeris
+        async function initSwissEph() {
+            try {
+                swe = new SwissEph();
+                await swe.initSwissEph();
+                initialized = true;
+                
+                // Hide loading, show app
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+                
+                // Set default dates
+                setDefaultDates();
+                
+            } catch (error) {
+                showError('Failed to initialize Swiss Ephemeris: ' + error.message);
+            }
+        }
+
+        // Set default dates to today
+        function setDefaultDates() {
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
+            const timeStr = today.toTimeString().split(' ')[0].substring(0, 5);
+            
+            document.getElementById('birth-date').value = dateStr;
+            document.getElementById('birth-time').value = timeStr;
+            document.getElementById('compare-date').value = dateStr;
+            document.getElementById('time-date').value = dateStr;
+            
+            // Set timezone to local offset
+            const timezoneOffset = -today.getTimezoneOffset() / 60;
+            document.getElementById('birth-timezone').value = timezoneOffset;
+        }
+
+        // Tab management
+        window.showTab = function(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab and mark button as active
+            document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        };
+
+        // Error handling
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-display').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('error-display').classList.add('hidden');
+            }, 5000);
+        }
+
+        // Planet symbols and names
+        const planetInfo = {
+            0: { name: 'Sun', symbol: '☉' },
+            1: { name: 'Moon', symbol: '☽' },
+            2: { name: 'Mercury', symbol: '☿' },
+            3: { name: 'Venus', symbol: '♀' },
+            4: { name: 'Mars', symbol: '♂' },
+            5: { name: 'Jupiter', symbol: '♃' },
+            6: { name: 'Saturn', symbol: '♄' },
+            7: { name: 'Uranus', symbol: '♅' },
+            8: { name: 'Neptune', symbol: '♆' },
+            9: { name: 'Pluto', symbol: '♇' }
+        };
+
+        // Zodiac signs
+        const zodiacSigns = [
+            'Aries ♈', 'Taurus ♉', 'Gemini ♊', 'Cancer ♋', 'Leo ♌', 'Virgo ♍',
+            'Libra ♎', 'Scorpio ♏', 'Sagittarius ♐', 'Capricorn ♑', 'Aquarius ♒', 'Pisces ♓'
+        ];
+
+        function formatPosition(longitude) {
+            const sign = Math.floor(longitude / 30);
+            const degree = longitude % 30;
+            return `${degree.toFixed(2)}° ${zodiacSigns[sign]}`;
+        }
+
+        // Calculate current positions
+        window.calculateCurrentPositions = async function() {
+            if (!initialized) return;
+            
+            try {
+                const now = new Date();
+                const jd = swe.julday(
+                    now.getUTCFullYear(),
+                    now.getUTCMonth() + 1,
+                    now.getUTCDate(),
+                    now.getUTCHours() + now.getUTCMinutes() / 60
+                );
+
+                const planetsContainer = document.getElementById('current-planets');
+                planetsContainer.innerHTML = '';
+
+                for (let i = 0; i <= 9; i++) {
+                    const position = swe.calc_ut(jd, i, swe.SEFLG_SWIEPH);
+                    const info = planetInfo[i];
+                    
+                    const planetCard = document.createElement('div');
+                    planetCard.className = 'p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200';
+                    planetCard.innerHTML = `
+                        <div class="flex items-center mb-2">
+                            <span class="planet-symbol mr-2">${info.symbol}</span>
+                            <span class="font-bold text-gray-800">${info.name}</span>
+                        </div>
+                        <p class="text-lg text-blue-800">${formatPosition(position[0])}</p>
+                        <p class="text-sm text-gray-600">${position[0].toFixed(6)}°</p>
+                    `;
+                    planetsContainer.appendChild(planetCard);
+                }
+
+                document.getElementById('current-timestamp').textContent = 
+                    `Calculated at: ${now.toUTCString()} (JD: ${jd.toFixed(6)})`;
+                document.getElementById('current-results').classList.remove('hidden');
+
+            } catch (error) {
+                showError('Error calculating current positions: ' + error.message);
+            }
+        };
+
+        // Calculate birth chart
+        window.calculateBirthChart = async function() {
+            if (!initialized) return;
+            
+            try {
+                const date = document.getElementById('birth-date').value;
+                const time = document.getElementById('birth-time').value;
+                const timezone = parseFloat(document.getElementById('birth-timezone').value);
+                const system = document.getElementById('birth-system').value;
+
+                if (!date || !time) {
+                    showError('Please enter both date and time');
+                    return;
+                }
+
+                const [year, month, day] = date.split('-').map(Number);
+                const [hour, minute] = time.split(':').map(Number);
+                
+                const utcHour = hour + minute / 60 - timezone;
+                const jd = swe.julday(year, month, day, utcHour);
+
+                // Set sidereal mode if needed
+                if (system === 'sidereal') {
+                    swe.set_sid_mode(swe.SE_SIDM_LAHIRI, 0, 0);
+                }
+
+                const flags = system === 'sidereal' ? 
+                    swe.SEFLG_SWIEPH | swe.SEFLG_SIDEREAL : 
+                    swe.SEFLG_SWIEPH;
+
+                const planetsContainer = document.getElementById('birth-planets');
+                planetsContainer.innerHTML = '';
+
+                for (let i = 0; i <= 9; i++) {
+                    const position = swe.calc_ut(jd, i, flags);
+                    const info = planetInfo[i];
+                    
+                    const planetCard = document.createElement('div');
+                    planetCard.className = 'p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200';
+                    planetCard.innerHTML = `
+                        <div class="flex items-center mb-2">
+                            <span class="planet-symbol mr-2">${info.symbol}</span>
+                            <span class="font-bold text-gray-800">${info.name}</span>
+                        </div>
+                        <p class="text-lg text-green-800">${formatPosition(position[0])}</p>
+                        <p class="text-sm text-gray-600">${position[0].toFixed(6)}°</p>
+                    `;
+                    planetsContainer.appendChild(planetCard);
+                }
+
+                document.getElementById('birth-info').textContent = 
+                    `Birth Chart (${system}): ${date} ${time} UTC${timezone >= 0 ? '+' : ''}${timezone} (JD: ${jd.toFixed(6)})`;
+                document.getElementById('birth-results').classList.remove('hidden');
+
+            } catch (error) {
+                showError('Error calculating birth chart: ' + error.message);
+            }
+        };
+
+        // Compare sidereal vs tropical
+        window.comparePositions = async function() {
+            if (!initialized) return;
+            
+            try {
+                const date = document.getElementById('compare-date').value;
+                const time = document.getElementById('compare-time').value;
+                const planetId = parseInt(document.getElementById('compare-planet').value);
+
+                if (!date || !time) {
+                    showError('Please enter both date and time');
+                    return;
+                }
+
+                const [year, month, day] = date.split('-').map(Number);
+                const [hour, minute] = time.split(':').map(Number);
+                
+                const jd = swe.julday(year, month, day, hour + minute / 60);
+
+                // Tropical position
+                const tropical = swe.calc_ut(jd, planetId, swe.SEFLG_SWIEPH);
+
+                // Sidereal position
+                swe.set_sid_mode(swe.SE_SIDM_LAHIRI, 0, 0);
+                const sidereal = swe.calc_ut(jd, planetId, swe.SEFLG_SWIEPH | swe.SEFLG_SIDEREAL);
+                const ayanamsa = swe.get_ayanamsa(jd);
+
+                document.getElementById('tropical-result').innerHTML = `
+                    <p class="font-bold">${formatPosition(tropical[0])}</p>
+                    <p class="text-sm text-gray-600">${tropical[0].toFixed(6)}°</p>
+                `;
+
+                document.getElementById('sidereal-result').innerHTML = `
+                    <p class="font-bold">${formatPosition(sidereal[0])}</p>
+                    <p class="text-sm text-gray-600">${sidereal[0].toFixed(6)}°</p>
+                `;
+
+                document.getElementById('ayanamsa-value').textContent = `${ayanamsa.toFixed(6)}°`;
+                document.getElementById('difference-value').textContent = `${(tropical[0] - sidereal[0]).toFixed(6)}°`;
+                document.getElementById('julian-day-value').textContent = jd.toFixed(6);
+
+                document.getElementById('compare-results').classList.remove('hidden');
+
+            } catch (error) {
+                showError('Error comparing positions: ' + error.message);
+            }
+        };
+
+        // Calculate time functions
+        window.calculateTimeFunctions = async function() {
+            if (!initialized) return;
+            
+            try {
+                const date = document.getElementById('time-date').value;
+                const time = document.getElementById('time-time').value;
+
+                if (!date || !time) {
+                    showError('Please enter both date and time');
+                    return;
+                }
+
+                const [year, month, day] = date.split('-').map(Number);
+                const [hour, minute] = time.split(':').map(Number);
+                
+                const jd = swe.julday(year, month, day, hour + minute / 60);
+                const sidTime = swe.sidtime(jd);
+                const deltaT = swe.deltat(jd);
+                const dayOfWeek = swe.day_of_week(jd);
+                const calDate = swe.revjul(jd, swe.SE_GREG_CAL);
+                const version = swe.version();
+
+                const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+                document.getElementById('julian-day').textContent = jd.toFixed(6);
+                document.getElementById('sidereal-time').textContent = `${sidTime.toFixed(6)} hours`;
+                document.getElementById('delta-t').textContent = `${deltaT.toFixed(2)} seconds`;
+                document.getElementById('day-of-week').textContent = days[dayOfWeek];
+                document.getElementById('calendar-date').textContent = 
+                    `${calDate.year}-${calDate.month.toString().padStart(2, '0')}-${calDate.day.toString().padStart(2, '0')} ${calDate.hour.toFixed(2)}`;
+                document.getElementById('version-info').textContent = version;
+
+                document.getElementById('time-results').classList.remove('hidden');
+
+            } catch (error) {
+                showError('Error calculating time functions: ' + error.message);
+            }
+        };
+
+        // Initialize when page loads
+        initSwissEph();
+    </script>
+
+    <style>
+        .tab-button {
+            @apply flex-1 py-2 px-4 text-center rounded-md text-sm font-medium transition-colors;
+            @apply text-gray-500 hover:text-gray-700;
+        }
+        .tab-button.active {
+            @apply bg-blue-500 text-white shadow-sm;
+        }
+    </style>
+</body>
+</html>

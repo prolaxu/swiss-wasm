@@ -1,0 +1,41 @@
+GNU GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
+
+Copyright (C) 2024 prolaxu
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+ADDITIONAL TERMS FOR SWISS EPHEMERIS
+
+This software is a JavaScript wrapper around the Swiss Ephemeris library.
+The Swiss Ephemeris is subject to the following license terms:
+
+Swiss Ephemeris License:
+- For non-commercial use: Free under GNU General Public License
+- For commercial use: Requires a commercial license from Astrodienst AG
+
+For commercial licensing of the Swiss Ephemeris, please contact:
+Astrodienst AG
+Dammstrasse 23
+CH-8702 Zollikon
+Switzerland
+Email: swisseph@astro.com
+Website: https://www.astro.com/swisseph/
+
+The Swiss Ephemeris source code and documentation can be found at:
+https://www.astro.com/swisseph/
+
+This wrapper library (swisseph-wasm) is provided under GPL-3.0-or-later,
+but commercial use may require additional licensing for the underlying
+Swiss Ephemeris calculations.

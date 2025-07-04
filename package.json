@@ -1,13 +1,69 @@
 {
-  "name": "swiss-wasm",
+  "name": "swisseph-wasm",
   "version": "1.0.0",
-  "description": "Swiss Ephemeris WebAssembly wrapper",
+  "description": "High-precision Swiss Ephemeris WebAssembly library for astronomical calculations in JavaScript",
   "type": "module",
   "main": "src/swisseph.js",
+  "module": "src/swisseph.js",
+  "exports": {
+    ".": {
+      "import": "./src/swisseph.js",
+      "types": "./types/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src/",
+    "wsam/",
+    "types/",
+    "examples/",
+    "DOCUMENTATION.md",
+    "QUICK_REFERENCE.md",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
-    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage"
+    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "prepublishOnly": "npm test",
+    "demo": "python3 -m http.server 8000",
+    "docs": "echo 'Documentation available in DOCUMENTATION.md'"
+  },
+  "keywords": [
+    "swiss-ephemeris",
+    "astronomy",
+    "astrology",
+    "ephemeris",
+    "webassembly",
+    "wasm",
+    "planetary-positions",
+    "astronomical-calculations",
+    "julian-day",
+    "sidereal",
+    "tropical",
+    "birth-chart",
+    "horoscope",
+    "celestial-mechanics"
+  ],
+  "author": {
+    "name": "prolaxu",
+    "url": "https://github.com/prolaxu"
+  },
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prolaxu/swisseph-wasm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/prolaxu/swisseph-wasm/issues"
+  },
+  "homepage": "https://github.com/prolaxu/swisseph-wasm#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browser": {
+    "src/swisseph.js": "./src/swisseph.js"
   },
   "devDependencies": {
     "@babel/core": "^7.22.0",
