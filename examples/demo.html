@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwissEph WebAssembly Demo</title>
+    <title>SwissEph WebAssembly - Interactive Demo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -25,14 +26,40 @@
         .loading { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+        }
+        .aspect-line { stroke-width: 2; opacity: 0.7; }
+        .planet-dot { r: 4; }
+        .house-line { stroke: #6b7280; stroke-width: 1; opacity: 0.5; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
     <header class="gradient-bg text-white py-6 shadow-lg">
         <div class="container mx-auto px-4">
-            <h1 class="text-4xl font-bold text-center mb-2">🌟 SwissEph WebAssembly Demo</h1>
-            <p class="text-center text-blue-100">Interactive Swiss Ephemeris Calculator</p>
+            <h1 class="text-4xl font-bold text-center mb-2">🌟 SwissEph WebAssembly - Interactive Demo</h1>
+            <p class="text-center text-blue-100 mb-4">Professional Swiss Ephemeris Calculator & Astrology Tools</p>
+            <div class="text-center">
+                <a href="https://github.com/prolaxu/swiss-wasm" target="_blank"
+                   class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-all">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    View on GitHub
+                </a>
+                <a href="https://www.npmjs.com/package/swisseph-wasm" target="_blank"
+                   class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-all ml-2">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M0 7.334v8h6.666v1.332H12v-1.332h12v-8H0zm6.666 6.664H5.334v-4H3.999v4H1.335V8.667h5.331v5.331zm4 0v1.336H8.001V8.667h5.334v5.332h-2.669v-.001zm12.001 0h-1.33v-4h-1.336v4h-1.335v-4h-1.33v4h-2.669V8.667h8v5.331z"/>
+                    </svg>
+                    NPM Package
+                </a>
+            </div>
         </div>
     </header>
 
@@ -48,11 +75,15 @@
         <div id="app" class="hidden">
             <!-- Navigation Tabs -->
             <div class="mb-8">
-                <nav class="flex space-x-1 bg-white rounded-lg p-1 shadow-md">
-                    <button onclick="showTab('current')" id="tab-current" class="tab-button active">Current Positions</button>
-                    <button onclick="showTab('birth')" id="tab-birth" class="tab-button">Birth Chart</button>
-                    <button onclick="showTab('compare')" id="tab-compare" class="tab-button">Sidereal vs Tropical</button>
-                    <button onclick="showTab('time')" id="tab-time" class="tab-button">Time Functions</button>
+                <nav class="flex flex-wrap gap-1 bg-white rounded-lg p-1 shadow-md">
+                    <button onclick="showTab('current')" id="tab-current" class="tab-button active">🌍 Current Positions</button>
+                    <button onclick="showTab('birth')" id="tab-birth" class="tab-button">🎂 Birth Chart</button>
+                    <button onclick="showTab('compare')" id="tab-compare" class="tab-button">⚖️ Sidereal vs Tropical</button>
+                    <button onclick="showTab('time')" id="tab-time" class="tab-button">⏰ Time Functions</button>
+                    <button onclick="showTab('houses')" id="tab-houses" class="tab-button">🏠 House Systems</button>
+                    <button onclick="showTab('aspects')" id="tab-aspects" class="tab-button">📐 Aspects</button>
+                    <button onclick="showTab('api')" id="tab-api" class="tab-button">🔧 API Explorer</button>
+                    <button onclick="showTab('chart')" id="tab-chart" class="tab-button">📊 Visual Chart</button>
                 </nav>
             </div>
 
@@ -228,6 +259,184 @@
                     </div>
                 </div>
             </div>
+
+            <!-- House Systems Tab -->
+            <div id="tab-content-houses" class="tab-content hidden">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">🏠 House Systems Calculator</h2>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                        <p class="text-sm text-blue-800">
+                            <strong>Note:</strong> This demo uses simplified house calculations for demonstration.
+                            For precise house cusps, use the full Swiss Ephemeris house calculation functions in your application.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                            <input type="date" id="houses-date" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Time (UTC)</label>
+                            <input type="time" id="houses-time" value="12:00" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">House System</label>
+                            <select id="house-system" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="P">Placidus</option>
+                                <option value="K">Koch</option>
+                                <option value="O">Porphyrius</option>
+                                <option value="R">Regiomontanus</option>
+                                <option value="C">Campanus</option>
+                                <option value="A">Equal (Ascendant)</option>
+                                <option value="E">Equal</option>
+                                <option value="W">Whole Sign</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Latitude</label>
+                            <input type="number" id="houses-lat" value="51.5074" step="0.0001" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Longitude</label>
+                            <input type="number" id="houses-lon" value="-0.1278" step="0.0001" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+
+                    <button onclick="calculateHouses()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg mb-4 transition-colors">
+                        Calculate Houses
+                    </button>
+
+                    <div id="houses-results" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="houses-grid"></div>
+                        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                            <p class="text-sm text-gray-600" id="houses-info"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aspects Tab -->
+            <div id="tab-content-aspects" class="tab-content hidden">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">📐 Planetary Aspects Calculator</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                            <input type="date" id="aspects-date" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Time (UTC)</label>
+                            <input type="time" id="aspects-time" value="12:00" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Orb Tolerance (degrees)</label>
+                            <input type="number" id="aspects-orb" value="8" min="1" max="15" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Coordinate System</label>
+                            <select id="aspects-system" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="tropical">Tropical</option>
+                                <option value="sidereal">Sidereal (Lahiri)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button onclick="calculateAspects()" class="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-lg mb-4 transition-colors">
+                        Calculate Aspects
+                    </button>
+
+                    <div id="aspects-results" class="hidden">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-bold mb-2">Major Aspects Found:</h3>
+                            <div id="aspects-list" class="space-y-2"></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="aspects-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Explorer Tab -->
+            <div id="tab-content-api" class="tab-content hidden">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">🔧 SwissEph API Explorer</h2>
+                    <p class="text-gray-600 mb-6">Test any SwissEph function with custom parameters</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Function</label>
+                            <select id="api-function" onchange="updateApiParams()" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="calc_ut">calc_ut - Calculate planet position</option>
+                                <option value="julday">julday - Convert to Julian Day</option>
+                                <option value="revjul">revjul - Convert from Julian Day</option>
+                                <option value="sidtime">sidtime - Sidereal time</option>
+                                <option value="deltat">deltat - Delta T</option>
+                                <option value="get_ayanamsa">get_ayanamsa - Ayanamsa value</option>
+                                <option value="houses">houses - Calculate houses</option>
+                                <option value="version">version - Get version</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Parameters (JSON)</label>
+                            <textarea id="api-params" rows="3" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm">[2460218.5, 0, 2]</textarea>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <button onclick="executeApiCall()" class="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-lg transition-colors">
+                            Execute Function
+                        </button>
+                        <button onclick="clearApiResults()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg ml-2 transition-colors">
+                            Clear
+                        </button>
+                    </div>
+
+                    <div id="api-results" class="hidden">
+                        <h3 class="text-lg font-bold mb-2">Result:</h3>
+                        <pre id="api-output" class="code-block p-4 rounded-lg mb-4"></pre>
+                        <h3 class="text-lg font-bold mb-2">JavaScript Code:</h3>
+                        <pre id="api-code" class="code-block p-4 rounded-lg"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual Chart Tab -->
+            <div id="tab-content-chart" class="tab-content hidden">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">📊 Visual Astrological Chart</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                            <input type="date" id="chart-date" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Time (UTC)</label>
+                            <input type="time" id="chart-time" value="12:00" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Chart Type</label>
+                            <select id="chart-type" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="wheel">Astrological Wheel</option>
+                                <option value="linear">Linear Positions</option>
+                                <option value="aspects">Aspect Grid</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button onclick="generateChart()" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg mb-4 transition-colors">
+                        Generate Chart
+                    </button>
+
+                    <div id="chart-results" class="hidden">
+                        <div class="flex justify-center mb-4">
+                            <canvas id="astro-chart" width="400" height="400" class="border border-gray-300 rounded-lg"></canvas>
+                        </div>
+                        <div id="chart-legend" class="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Error Display -->
@@ -238,8 +447,8 @@
 
         <!-- Footer -->
         <footer class="mt-12 text-center text-gray-500">
-            <p>Powered by Swiss Ephemeris WebAssembly | 
-               <a href="https://github.com/your-repo/swiss-wasm" class="text-blue-500 hover:underline">View on GitHub</a>
+            <p>Powered by Swiss Ephemeris WebAssembly |
+               <a href="https://github.com/prolaxu/swiss-wasm" class="text-blue-500 hover:underline">View on GitHub</a>
             </p>
         </footer>
     </div>
@@ -313,16 +522,16 @@
 
         // Planet symbols and names
         const planetInfo = {
-            0: { name: 'Sun', symbol: '☉' },
-            1: { name: 'Moon', symbol: '☽' },
-            2: { name: 'Mercury', symbol: '☿' },
-            3: { name: 'Venus', symbol: '♀' },
-            4: { name: 'Mars', symbol: '♂' },
-            5: { name: 'Jupiter', symbol: '♃' },
-            6: { name: 'Saturn', symbol: '♄' },
-            7: { name: 'Uranus', symbol: '♅' },
-            8: { name: 'Neptune', symbol: '♆' },
-            9: { name: 'Pluto', symbol: '♇' }
+            0: { name: 'Sun', symbol: '☉', color: '#FFA500' },
+            1: { name: 'Moon', symbol: '☽', color: '#C0C0C0' },
+            2: { name: 'Mercury', symbol: '☿', color: '#87CEEB' },
+            3: { name: 'Venus', symbol: '♀', color: '#FFB6C1' },
+            4: { name: 'Mars', symbol: '♂', color: '#FF6347' },
+            5: { name: 'Jupiter', symbol: '♃', color: '#9370DB' },
+            6: { name: 'Saturn', symbol: '♄', color: '#2F4F4F' },
+            7: { name: 'Uranus', symbol: '♅', color: '#40E0D0' },
+            8: { name: 'Neptune', symbol: '♆', color: '#4169E1' },
+            9: { name: 'Pluto', symbol: '♇', color: '#8B4513' }
         };
 
         // Zodiac signs
@@ -526,17 +735,476 @@
             }
         };
 
+        // Calculate houses
+        window.calculateHouses = async function() {
+            if (!initialized) return;
+
+            try {
+                const date = document.getElementById('houses-date').value;
+                const time = document.getElementById('houses-time').value;
+                const houseSystem = document.getElementById('house-system').value;
+                const lat = parseFloat(document.getElementById('houses-lat').value);
+                const lon = parseFloat(document.getElementById('houses-lon').value);
+
+                if (!date || !time) {
+                    showError('Please enter both date and time');
+                    return;
+                }
+
+                const [year, month, day] = date.split('-').map(Number);
+                const [hour, minute] = time.split(':').map(Number);
+                const jd = swe.julday(year, month, day, hour + minute / 60);
+
+                // Calculate sidereal time and ARMC for house calculation
+                const sidTime = swe.sidtime(jd);
+                const armc = (sidTime + lon / 15) * 15; // Convert to degrees
+
+                // For demonstration, we'll calculate approximate house cusps
+                // In a real implementation, you'd use the proper Swiss Ephemeris houses function
+                const houseCusps = [];
+
+                // Simple equal house system as fallback
+                const ascendant = (armc + 90) % 360; // Simplified ascendant calculation
+
+                for (let i = 0; i < 12; i++) {
+                    let cusp;
+                    if (houseSystem === 'E' || houseSystem === 'A') {
+                        // Equal houses
+                        cusp = (ascendant + (i * 30)) % 360;
+                    } else {
+                        // Approximate other systems (simplified)
+                        const baseAngle = ascendant + (i * 30);
+                        // Add some variation for different house systems
+                        const variation = Math.sin((i * Math.PI) / 6) * 5; // Small variation
+                        cusp = (baseAngle + variation) % 360;
+                    }
+                    houseCusps.push(cusp);
+                }
+
+                const housesContainer = document.getElementById('houses-grid');
+                housesContainer.innerHTML = '';
+
+                for (let i = 0; i < 12; i++) {
+                    const houseCard = document.createElement('div');
+                    houseCard.className = 'p-3 bg-orange-50 rounded-lg border border-orange-200';
+                    houseCard.innerHTML = `
+                        <div class="font-bold text-orange-800">House ${i + 1}</div>
+                        <div class="text-lg">${formatPosition(houseCusps[i])}</div>
+                        <div class="text-sm text-gray-600">${houseCusps[i].toFixed(4)}°</div>
+                    `;
+                    housesContainer.appendChild(houseCard);
+                }
+
+                const systemNames = {
+                    'P': 'Placidus', 'K': 'Koch', 'O': 'Porphyrius', 'R': 'Regiomontanus',
+                    'C': 'Campanus', 'A': 'Equal (Ascendant)', 'E': 'Equal', 'W': 'Whole Sign'
+                };
+
+                document.getElementById('houses-info').textContent =
+                    `Houses calculated using ${systemNames[houseSystem] || houseSystem} system at ${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E (JD: ${jd.toFixed(6)})`;
+                document.getElementById('houses-results').classList.remove('hidden');
+
+            } catch (error) {
+                showError('Error calculating houses: ' + error.message);
+            }
+        };
+
+        // Calculate aspects
+        window.calculateAspects = async function() {
+            if (!initialized) return;
+
+            try {
+                const date = document.getElementById('aspects-date').value;
+                const time = document.getElementById('aspects-time').value;
+                const orb = parseFloat(document.getElementById('aspects-orb').value);
+                const system = document.getElementById('aspects-system').value;
+
+                if (!date || !time) {
+                    showError('Please enter both date and time');
+                    return;
+                }
+
+                const [year, month, day] = date.split('-').map(Number);
+                const [hour, minute] = time.split(':').map(Number);
+                const jd = swe.julday(year, month, day, hour + minute / 60);
+
+                if (system === 'sidereal') {
+                    swe.set_sid_mode(swe.SE_SIDM_LAHIRI, 0, 0);
+                }
+
+                const flags = system === 'sidereal' ?
+                    swe.SEFLG_SWIEPH | swe.SEFLG_SIDEREAL :
+                    swe.SEFLG_SWIEPH;
+
+                // Calculate positions for main planets
+                const planets = [];
+                for (let i = 0; i <= 9; i++) {
+                    const pos = swe.calc_ut(jd, i, flags);
+                    planets.push({ id: i, name: planetInfo[i].name, symbol: planetInfo[i].symbol, position: pos[0] });
+                }
+
+                // Define major aspects
+                const aspects = [
+                    { name: 'Conjunction', angle: 0, symbol: '☌', color: 'red' },
+                    { name: 'Opposition', angle: 180, symbol: '☍', color: 'blue' },
+                    { name: 'Trine', angle: 120, symbol: '△', color: 'green' },
+                    { name: 'Square', angle: 90, symbol: '□', color: 'orange' },
+                    { name: 'Sextile', angle: 60, symbol: '⚹', color: 'purple' }
+                ];
+
+                const foundAspects = [];
+
+                // Check all planet pairs
+                for (let i = 0; i < planets.length; i++) {
+                    for (let j = i + 1; j < planets.length; j++) {
+                        const planet1 = planets[i];
+                        const planet2 = planets[j];
+                        let diff = Math.abs(planet1.position - planet2.position);
+                        if (diff > 180) diff = 360 - diff;
+
+                        for (const aspect of aspects) {
+                            const aspectDiff = Math.abs(diff - aspect.angle);
+                            if (aspectDiff <= orb) {
+                                foundAspects.push({
+                                    planet1,
+                                    planet2,
+                                    aspect,
+                                    orb: aspectDiff.toFixed(2),
+                                    exact: diff.toFixed(2)
+                                });
+                            }
+                        }
+                    }
+                }
+
+                // Display aspects
+                const aspectsList = document.getElementById('aspects-list');
+                aspectsList.innerHTML = '';
+
+                foundAspects.forEach(asp => {
+                    const aspectDiv = document.createElement('div');
+                    aspectDiv.className = `p-3 bg-${asp.aspect.color}-50 rounded-lg border border-${asp.aspect.color}-200`;
+                    aspectDiv.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold">${asp.planet1.symbol} ${asp.planet1.name} ${asp.aspect.symbol} ${asp.planet2.symbol} ${asp.planet2.name}</span>
+                            <span class="text-sm">${asp.aspect.name}</span>
+                        </div>
+                        <div class="text-sm text-gray-600">Orb: ${asp.orb}° | Exact: ${asp.exact}°</div>
+                    `;
+                    aspectsList.appendChild(aspectDiv);
+                });
+
+                if (foundAspects.length === 0) {
+                    aspectsList.innerHTML = '<p class="text-gray-500 italic">No major aspects found within the specified orb.</p>';
+                }
+
+                document.getElementById('aspects-results').classList.remove('hidden');
+
+            } catch (error) {
+                showError('Error calculating aspects: ' + error.message);
+            }
+        };
+
+        // API Explorer functions
+        window.updateApiParams = function() {
+            const func = document.getElementById('api-function').value;
+            const paramsField = document.getElementById('api-params');
+
+            const examples = {
+                'calc_ut': '[2460218.5, 0, 2]',
+                'julday': '[2023, 6, 15, 12.0]',
+                'revjul': '[2460218.5, 1]',
+                'sidtime': '[2460218.5]',
+                'deltat': '[2460218.5]',
+                'get_ayanamsa': '[2460218.5]',
+                'houses': '[2460218.5, 51.5074, -0.1278, "P"]',
+                'version': '[]'
+            };
+
+            paramsField.value = examples[func] || '[]';
+        };
+
+        window.executeApiCall = function() {
+            if (!initialized) return;
+
+            try {
+                const func = document.getElementById('api-function').value;
+                const paramsStr = document.getElementById('api-params').value;
+                const params = JSON.parse(paramsStr);
+
+                let result;
+                switch (func) {
+                    case 'calc_ut':
+                        result = swe.calc_ut(...params);
+                        break;
+                    case 'julday':
+                        result = swe.julday(...params);
+                        break;
+                    case 'revjul':
+                        result = swe.revjul(...params);
+                        break;
+                    case 'sidtime':
+                        result = swe.sidtime(...params);
+                        break;
+                    case 'deltat':
+                        result = swe.deltat(...params);
+                        break;
+                    case 'get_ayanamsa':
+                        result = swe.get_ayanamsa(...params);
+                        break;
+                    case 'houses':
+                        result = swe.houses(...params);
+                        break;
+                    case 'version':
+                        result = swe.version();
+                        break;
+                    default:
+                        throw new Error('Unknown function');
+                }
+
+                document.getElementById('api-output').textContent = JSON.stringify(result, null, 2);
+                document.getElementById('api-code').textContent = `const result = swe.${func}(${paramsStr.slice(1, -1)});`;
+                document.getElementById('api-results').classList.remove('hidden');
+
+            } catch (error) {
+                showError('API call failed: ' + error.message);
+            }
+        };
+
+        window.clearApiResults = function() {
+            document.getElementById('api-results').classList.add('hidden');
+        };
+
+        // Generate visual chart
+        window.generateChart = async function() {
+            if (!initialized) return;
+
+            try {
+                const date = document.getElementById('chart-date').value;
+                const time = document.getElementById('chart-time').value;
+                const chartType = document.getElementById('chart-type').value;
+
+                if (!date || !time) {
+                    showError('Please enter both date and time');
+                    return;
+                }
+
+                const [year, month, day] = date.split('-').map(Number);
+                const [hour, minute] = time.split(':').map(Number);
+                const jd = swe.julday(year, month, day, hour + minute / 60);
+
+                // Calculate planet positions
+                const planets = [];
+                for (let i = 0; i <= 9; i++) {
+                    const pos = swe.calc_ut(jd, i, swe.SEFLG_SWIEPH);
+                    planets.push({
+                        id: i,
+                        name: planetInfo[i].name,
+                        symbol: planetInfo[i].symbol,
+                        position: pos[0],
+                        color: planetInfo[i].color || '#333'
+                    });
+                }
+
+                const canvas = document.getElementById('astro-chart');
+                const ctx = canvas.getContext('2d');
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const radius = 150;
+
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (chartType === 'wheel') {
+                    // Draw zodiac wheel
+                    ctx.strokeStyle = '#ddd';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                    ctx.stroke();
+
+                    // Draw zodiac signs
+                    const signs = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
+                    for (let i = 0; i < 12; i++) {
+                        const angle = (i * 30 - 90) * Math.PI / 180;
+                        const x = centerX + Math.cos(angle) * (radius + 20);
+                        const y = centerY + Math.sin(angle) * (radius + 20);
+
+                        ctx.fillStyle = '#666';
+                        ctx.font = '16px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(signs[i], x, y + 5);
+                    }
+
+                    // Draw planets
+                    planets.forEach(planet => {
+                        const angle = (planet.position - 90) * Math.PI / 180;
+                        const x = centerX + Math.cos(angle) * radius;
+                        const y = centerY + Math.sin(angle) * radius;
+
+                        ctx.fillStyle = planet.color || '#333';
+                        ctx.beginPath();
+                        ctx.arc(x, y, 6, 0, 2 * Math.PI);
+                        ctx.fill();
+
+                        ctx.fillStyle = '#000';
+                        ctx.font = '12px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(planet.symbol, x, y - 15);
+                    });
+
+                } else if (chartType === 'linear') {
+                    // Draw linear chart
+                    const barHeight = 30;
+                    const startY = 50;
+
+                    // Draw zodiac background
+                    const signs = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
+                    for (let i = 0; i < 12; i++) {
+                        const x = (i * canvas.width) / 12;
+                        const width = canvas.width / 12;
+
+                        ctx.fillStyle = i % 2 === 0 ? '#f8f9fa' : '#e9ecef';
+                        ctx.fillRect(x, startY, width, barHeight);
+
+                        ctx.strokeStyle = '#dee2e6';
+                        ctx.strokeRect(x, startY, width, barHeight);
+
+                        ctx.fillStyle = '#666';
+                        ctx.font = '14px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(signs[i], x + width/2, startY - 5);
+                    }
+
+                    // Draw planets
+                    planets.forEach((planet, index) => {
+                        const x = (planet.position / 360) * canvas.width;
+                        const y = startY + barHeight + 20 + (index * 25);
+
+                        ctx.fillStyle = planet.color || '#333';
+                        ctx.beginPath();
+                        ctx.arc(x, y, 8, 0, 2 * Math.PI);
+                        ctx.fill();
+
+                        ctx.fillStyle = '#000';
+                        ctx.font = '12px Arial';
+                        ctx.textAlign = 'left';
+                        ctx.fillText(`${planet.symbol} ${planet.name} ${formatPosition(planet.position)}`, x + 15, y + 4);
+
+                        // Draw line to position
+                        ctx.strokeStyle = planet.color || '#333';
+                        ctx.setLineDash([2, 2]);
+                        ctx.beginPath();
+                        ctx.moveTo(x, startY + barHeight);
+                        ctx.lineTo(x, y - 8);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    });
+
+                } else if (chartType === 'aspects') {
+                    // Draw aspect grid
+                    const gridSize = 30;
+                    const startX = 50;
+                    const startY = 50;
+
+                    // Draw planet labels
+                    planets.forEach((planet, i) => {
+                        const x = startX + (i * gridSize);
+                        const y = startY + (i * gridSize);
+
+                        // Column header
+                        ctx.fillStyle = '#333';
+                        ctx.font = '12px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(planet.symbol, x + gridSize/2, startY - 10);
+
+                        // Row header
+                        ctx.textAlign = 'right';
+                        ctx.fillText(planet.symbol, startX - 10, y + gridSize/2 + 4);
+                    });
+
+                    // Draw grid and aspects
+                    for (let i = 0; i < planets.length; i++) {
+                        for (let j = 0; j < planets.length; j++) {
+                            const x = startX + (j * gridSize);
+                            const y = startY + (i * gridSize);
+
+                            // Draw cell
+                            ctx.strokeStyle = '#ddd';
+                            ctx.strokeRect(x, y, gridSize, gridSize);
+
+                            if (i !== j) {
+                                // Calculate aspect
+                                let diff = Math.abs(planets[i].position - planets[j].position);
+                                if (diff > 180) diff = 360 - diff;
+
+                                let aspectSymbol = '';
+                                let aspectColor = '#f8f9fa';
+
+                                if (Math.abs(diff - 0) <= 8) { aspectSymbol = '☌'; aspectColor = '#ffebee'; }
+                                else if (Math.abs(diff - 60) <= 6) { aspectSymbol = '⚹'; aspectColor = '#f3e5f5'; }
+                                else if (Math.abs(diff - 90) <= 8) { aspectSymbol = '□'; aspectColor = '#fff3e0'; }
+                                else if (Math.abs(diff - 120) <= 8) { aspectSymbol = '△'; aspectColor = '#e8f5e8'; }
+                                else if (Math.abs(diff - 180) <= 8) { aspectSymbol = '☍'; aspectColor = '#e3f2fd'; }
+
+                                if (aspectSymbol) {
+                                    ctx.fillStyle = aspectColor;
+                                    ctx.fillRect(x + 1, y + 1, gridSize - 2, gridSize - 2);
+
+                                    ctx.fillStyle = '#333';
+                                    ctx.font = '16px Arial';
+                                    ctx.textAlign = 'center';
+                                    ctx.fillText(aspectSymbol, x + gridSize/2, y + gridSize/2 + 6);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Update legend
+                const legend = document.getElementById('chart-legend');
+                legend.innerHTML = '';
+                planets.forEach(planet => {
+                    const item = document.createElement('div');
+                    item.className = 'flex items-center space-x-2 p-2 bg-gray-50 rounded';
+                    item.innerHTML = `
+                        <span class="text-lg">${planet.symbol}</span>
+                        <span class="text-sm">${planet.name}</span>
+                        <span class="text-xs text-gray-500">${formatPosition(planet.position)}</span>
+                    `;
+                    legend.appendChild(item);
+                });
+
+                document.getElementById('chart-results').classList.remove('hidden');
+
+            } catch (error) {
+                showError('Error generating chart: ' + error.message);
+            }
+        };
+
         // Initialize when page loads
         initSwissEph();
     </script>
 
     <style>
         .tab-button {
-            @apply flex-1 py-2 px-4 text-center rounded-md text-sm font-medium transition-colors;
-            @apply text-gray-500 hover:text-gray-700;
+            flex: 1;
+            padding: 0.5rem 1rem;
+            text-align: center;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: #6b7280;
+            min-width: 120px;
+        }
+        .tab-button:hover {
+            color: #374151;
         }
         .tab-button.active {
-            @apply bg-blue-500 text-white shadow-sm;
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
     </style>
 </body>

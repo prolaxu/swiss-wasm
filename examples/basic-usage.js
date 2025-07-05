@@ -296,6 +296,7 @@ export {
 };
 
 // Run examples if this file is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Check if running in Node.js and if this is the main module
+if (typeof process !== 'undefined' && process.argv && import.meta.url === `file://${process.argv[1]}`) {
   runAllExamples().catch(console.error);
 }

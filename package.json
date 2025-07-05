@@ -1,6 +1,6 @@
 {
   "name": "swisseph-wasm",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "High-precision Swiss Ephemeris WebAssembly library for astronomical calculations in JavaScript",
   "type": "module",
   "main": "src/swisseph.js",
@@ -53,12 +53,12 @@
   "license": "GPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prolaxu/swisseph-wasm.git"
+    "url": "git+https://github.com/prolaxu/swiss-wasm.git"
   },
   "bugs": {
-    "url": "https://github.com/prolaxu/swisseph-wasm/issues"
+    "url": "https://github.com/prolaxu/swiss-wasm/issues"
   },
-  "homepage": "https://github.com/prolaxu/swisseph-wasm#readme",
+  "homepage": "https://github.com/prolaxu/swiss-wasm#readme",
   "engines": {
     "node": ">=14.0.0"
   },

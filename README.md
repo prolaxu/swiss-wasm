@@ -4,13 +4,30 @@ A high-precision JavaScript wrapper for the Swiss Ephemeris WebAssembly module, 
 
 ## 🌟 Features
 
-- **High Precision**: Based on the renowned Swiss Ephemeris
-- **WebAssembly Performance**: Fast calculations in the browser and Node.js
-- **Comprehensive API**: Full access to Swiss Ephemeris functions
-- **Modern JavaScript**: ES6+ with async/await support
-- **Well Tested**: 106 tests with 86% coverage
-- **Complete Documentation**: Extensive guides and examples
-- **Professional Grade**: Suitable for commercial applications
+- **🎯 High Precision**: Based on the renowned Swiss Ephemeris
+- **⚡ WebAssembly Performance**: Fast calculations in browser and Node.js
+- **🌐 Cross-Platform**: Works in Node.js, browsers, Vue.js, React, and more
+- **📦 Zero Dependencies**: Self-contained with embedded WASM
+- **🔧 Easy Integration**: Simple import, works with all modern bundlers
+- **📚 Comprehensive API**: Full access to Swiss Ephemeris functions
+- **💻 Modern JavaScript**: ES6+ with async/await support
+- **🧪 Well Tested**: 106 tests with 86% coverage
+- **📖 Complete Documentation**: Extensive guides and examples
+- **🏢 Professional Grade**: Suitable for commercial applications
+- **🔄 CDN Ready**: Available via jsdelivr CDN for quick prototyping
+
+## 🚀 Live Demo
+
+**Try it now**: [Interactive SwissEph Demo](https://prolaxu.github.io/swisseph-wasm/examples/demo.html)
+
+Experience all features including:
+- 🌍 Real-time planetary positions
+- 🎂 Birth chart calculations
+- ⚖️ Sidereal vs Tropical comparisons
+- 🏠 House system calculations
+- 📐 Planetary aspects analysis
+- 🔧 Interactive API explorer
+- 📊 Visual astrological charts
 
 ## 📦 Installation
 
@@ -29,6 +46,14 @@ yarn add swisseph-wasm
 pnpm add swisseph-wasm
 ```
 
+### CDN (Browser)
+```html
+<script type="module">
+  import SwissEph from 'https://cdn.jsdelivr.net/gh/prolaxu/swisseph-wasm@main/src/swisseph.js';
+  // Your code here
+</script>
+```
+
 ## 📦 What's Included
 
 - **Core Library** (`src/swisseph.js`) - Main JavaScript wrapper
@@ -40,6 +65,8 @@ pnpm add swisseph-wasm
 - **TypeScript Definitions** - Full type support
 
 ## 🚀 Quick Start
+
+> **👀 Want to see it in action first?** Try the [Interactive Demo](https://prolaxu.github.io/swisseph-wasm/examples/demo.html)
 
 ### Basic Usage
 
@@ -82,6 +109,218 @@ Object.entries(chart.planets).forEach(([name, planet]) => {
 });
 
 calculator.destroy();
+```
+
+## 🌐 Cross-Platform Usage
+
+SwissEph WebAssembly works seamlessly across different environments. Here are platform-specific setup instructions:
+
+### Node.js
+```javascript
+import SwissEph from 'swisseph-wasm';
+
+async function nodeExample() {
+  const swe = new SwissEph();
+  await swe.initSwissEph();
+
+  const jd = swe.julday(2023, 6, 15, 12.0);
+  const sunPos = swe.calc_ut(jd, swe.SE_SUN, swe.SEFLG_SWIEPH);
+
+  console.log(`Sun longitude: ${sunPos[0].toFixed(2)}°`);
+  swe.close();
+}
+
+nodeExample().catch(console.error);
+```
+
+### Vite (Vue.js, React, etc.)
+Add this configuration to your `vite.config.js`:
+
+```javascript
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue' // or react, etc.
+
+export default defineConfig({
+  plugins: [vue()],
+  server: {
+    fs: {
+      allow: ['..']
+    }
+  },
+  assetsInclude: ['**/*.wasm'],
+  optimizeDeps: {
+    exclude: ['swisseph-wasm']
+  }
+})
+```
+
+### Vue.js Component
+```vue
+<script setup>
+import SwissEph from 'swisseph-wasm';
+import { onMounted, onUnmounted, ref } from 'vue';
+
+const swe = ref(null);
+const isInitialized = ref(false);
+const result = ref('');
+
+onMounted(async () => {
+  try {
+    swe.value = new SwissEph();
+    await swe.value.initSwissEph();
+    isInitialized.value = true;
+  } catch (error) {
+    console.error('Failed to initialize SwissEph:', error);
+  }
+});
+
+onUnmounted(() => {
+  if (swe.value) {
+    swe.value.close();
+  }
+});
+
+const calculate = () => {
+  if (!isInitialized.value) return;
+
+  const jd = swe.value.julday(2023, 6, 15, 12.0);
+  const sunPos = swe.value.calc_ut(jd, swe.value.SE_SUN, swe.value.SEFLG_SWIEPH);
+  result.value = `Sun: ${sunPos[0].toFixed(2)}°`;
+};
+</script>
+
+<template>
+  <div>
+    <button @click="calculate" :disabled="!isInitialized">
+      Calculate Sun Position
+    </button>
+    <p>{{ result }}</p>
+  </div>
+</template>
+```
+
+### React Component
+```jsx
+import React, { useState, useEffect } from 'react';
+import SwissEph from 'swisseph-wasm';
+
+function AstrologyCalculator() {
+  const [swe, setSwe] = useState(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [result, setResult] = useState('');
+
+  useEffect(() => {
+    const initSwissEph = async () => {
+      try {
+        const swissEph = new SwissEph();
+        await swissEph.initSwissEph();
+        setSwe(swissEph);
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize SwissEph:', error);
+      }
+    };
+
+    initSwissEph();
+
+    return () => {
+      if (swe) {
+        swe.close();
+      }
+    };
+  }, []);
+
+  const calculate = () => {
+    if (!isInitialized || !swe) return;
+
+    const jd = swe.julday(2023, 6, 15, 12.0);
+    const sunPos = swe.calc_ut(jd, swe.SE_SUN, swe.SEFLG_SWIEPH);
+    setResult(`Sun: ${sunPos[0].toFixed(2)}°`);
+  };
+
+  return (
+    <div>
+      <button onClick={calculate} disabled={!isInitialized}>
+        Calculate Sun Position
+      </button>
+      <p>{result}</p>
+    </div>
+  );
+}
+
+export default AstrologyCalculator;
+```
+
+### Vanilla HTML + JavaScript
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SwissEph Example</title>
+</head>
+<body>
+    <button id="calculate">Calculate Sun Position</button>
+    <div id="result"></div>
+
+    <script type="module">
+        import SwissEph from 'https://cdn.jsdelivr.net/gh/prolaxu/swisseph-wasm@main/src/swisseph.js';
+
+        let swe = null;
+        let isInitialized = false;
+
+        // Initialize SwissEph
+        (async () => {
+            try {
+                swe = new SwissEph();
+                await swe.initSwissEph();
+                isInitialized = true;
+                console.log('SwissEph initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize SwissEph:', error);
+            }
+        })();
+
+        // Calculate button handler
+        document.getElementById('calculate').addEventListener('click', () => {
+            if (!isInitialized || !swe) {
+                document.getElementById('result').textContent = 'SwissEph not initialized';
+                return;
+            }
+
+            const jd = swe.julday(2023, 6, 15, 12.0);
+            const sunPos = swe.calc_ut(jd, swe.SE_SUN, swe.SEFLG_SWIEPH);
+            document.getElementById('result').textContent = `Sun: ${sunPos[0].toFixed(2)}°`;
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (swe) {
+                swe.close();
+            }
+        });
+    </script>
+</body>
+</html>
+```
+
+### Webpack Configuration
+If using Webpack, add this to your `webpack.config.js`:
+
+```javascript
+module.exports = {
+  // ... other config
+  experiments: {
+    asyncWebAssembly: true,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.wasm$/,
+        type: 'webassembly/async',
+      },
+    ],
+  },
+};
 ```
 
 ## 📚 Documentation
@@ -178,7 +417,90 @@ swiss-wasm/
 - ES6 modules support
 - Async/await support
 
+## 🔧 Troubleshooting
+
+### Common Issues and Solutions
+
+#### WASM Loading Errors in Vite/Vue.js
+**Error**: `WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 64 6f`
+
+**Solution**: Add Vite configuration to your `vite.config.js`:
+```javascript
+export default defineConfig({
+  plugins: [vue()],
+  server: {
+    fs: { allow: ['..'] }
+  },
+  assetsInclude: ['**/*.wasm'],
+  optimizeDeps: {
+    exclude: ['swisseph-wasm']
+  }
+})
+```
+
+#### Import Errors in Node.js
+**Error**: `Cannot read properties of undefined (reading 'ccall')`
+
+**Solution**: Always call `await swe.initSwissEph()` before using any methods:
+```javascript
+const swe = new SwissEph();
+await swe.initSwissEph(); // Required!
+const jd = swe.julday(2023, 6, 15, 12.0);
+```
+
+#### Browser Process Errors
+**Error**: `process is not defined` in browser
+
+**Solution**: This is fixed in the latest version. Update to the latest version:
+```bash
+npm update swisseph-wasm
+```
+
+#### Memory Issues
+**Error**: Out of memory or performance issues
+
+**Solution**: Always call `swe.close()` when done:
+```javascript
+try {
+  const swe = new SwissEph();
+  await swe.initSwissEph();
+  // ... your calculations
+} finally {
+  swe.close(); // Always clean up!
+}
+```
+
+#### CDN Import Issues
+**Error**: Module not found when using CDN
+
+**Solution**: Use the correct CDN URL:
+```javascript
+// ✅ Correct
+import SwissEph from 'https://cdn.jsdelivr.net/gh/prolaxu/swisseph-wasm@main/src/swisseph.js';
+
+// ❌ Incorrect
+import SwissEph from 'https://cdn.jsdelivr.net/npm/swisseph-wasm';
+```
+
+#### TypeScript Errors
+**Error**: Type definitions not found
+
+**Solution**: Types are included in the package:
+```typescript
+import SwissEph from 'swisseph-wasm';
+// Types are automatically available
+```
+
+### Performance Tips
+
+1. **Reuse instances**: Create one SwissEph instance and reuse it for multiple calculations
+2. **Batch calculations**: Calculate multiple planets in one session rather than creating new instances
+3. **Memory management**: Always call `close()` when done
+4. **Async initialization**: Use `await swe.initSwissEph()` only once per instance
+
 ## 💡 Examples
+
+> **🌟 Interactive Examples**: Try all these examples and more in the [Live Demo](https://prolaxu.github.io/swisseph-wasm/examples/demo.html)
 
 ### Current Planetary Positions
 ```javascript

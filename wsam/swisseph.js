@@ -11,8 +11,12 @@ var Swisseph = ( () => {
           readyPromiseReject = reject
       }
       );
-      var ENVIRONMENT_IS_WEB = true;
-      var ENVIRONMENT_IS_WORKER = false;
+      // Detect environment properly
+      var ENVIRONMENT_IS_NODE = typeof process !== 'undefined' && process.versions && process.versions.node;
+      var ENVIRONMENT_IS_WEB = typeof window !== 'undefined' || (typeof importScripts === 'function' && !ENVIRONMENT_IS_NODE);
+      var ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
+
+
       Module["expectedDataFileDownloads"] ??= 0;
       Module["expectedDataFileDownloads"]++;
       ( () => {
@@ -28,12 +32,61 @@ var Swisseph = ( () => {
                   PACKAGE_PATH = encodeURIComponent(location.pathname.substring(0, location.pathname.lastIndexOf("/")) + "/")
               }
               var PACKAGE_NAME = "wsam/swisseph.data";
-              var REMOTE_PACKAGE_BASE = import.meta.resolve("./swisseph.data");
+              var REMOTE_PACKAGE_BASE;
+
+              if (ENVIRONMENT_IS_NODE) {
+                  // In Node.js, resolve relative to the current module
+                  REMOTE_PACKAGE_BASE = new URL("./swisseph.data", import.meta.url).href;
+              } else {
+                  // In browser, use import.meta.resolve if available, otherwise relative path
+                  REMOTE_PACKAGE_BASE = import.meta.resolve ? import.meta.resolve("./swisseph.data") : "./swisseph.data";
+              }
+
               var REMOTE_PACKAGE_NAME = Module["locateFile"] ? Module["locateFile"](REMOTE_PACKAGE_BASE, "") : REMOTE_PACKAGE_BASE;
               var REMOTE_PACKAGE_SIZE = metadata["remote_package_size"];
               function fetchRemotePackage(packageName, packageSize, callback, errback) {
                   Module["dataFileDownloads"] ??= {};
-                  fetch(packageName).catch(cause => Promise.reject(new Error(`Network Error: ${packageName}`,{
+
+                  // Cross-platform fetch function
+                  async function crossPlatformFetch(url) {
+                    if (ENVIRONMENT_IS_NODE) {
+                      // Node.js environment - use fs to read local files
+                      try {
+                        const { readFile } = await import('fs/promises');
+                        const { fileURLToPath } = await import('url');
+                        const { resolve, dirname } = await import('path');
+
+                        let filePath;
+                        if (url.startsWith('file://')) {
+                          filePath = fileURLToPath(url);
+                        } else if (url.startsWith('./') || url.startsWith('../')) {
+                          // Resolve relative to current module
+                          const currentDir = dirname(fileURLToPath(import.meta.url));
+                          filePath = resolve(currentDir, url);
+                        } else {
+                          filePath = url;
+                        }
+
+                        const data = await readFile(filePath);
+                        return {
+                          ok: true,
+                          arrayBuffer: () => Promise.resolve(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength))
+                        };
+                      } catch (error) {
+                        return {
+                          ok: false,
+                          status: 404,
+                          url: url,
+                          error: error
+                        };
+                      }
+                    } else {
+                      // Browser environment - use standard fetch
+                      return fetch(url);
+                    }
+                  }
+
+                  crossPlatformFetch(packageName).catch(cause => Promise.reject(new Error(`Network Error: ${packageName}`,{
                       cause
                   }))).then(response => {
                       if (!response.ok) {
@@ -221,16 +274,78 @@ var Swisseph = ( () => {
           }
           {
               readAsync = async url => {
-                  var response = await fetch(url, {
-                      credentials: "same-origin"
-                  });
-                  if (response.ok) {
-                      return response.arrayBuffer()
+                  if (ENVIRONMENT_IS_NODE) {
+                      // Node.js environment
+                      try {
+                          const { readFile } = await import('fs/promises');
+                          const { fileURLToPath } = await import('url');
+                          const { resolve, dirname } = await import('path');
+
+                          let filePath;
+                          if (url.startsWith('file://')) {
+                              filePath = fileURLToPath(url);
+                          } else if (url.startsWith('./') || url.startsWith('../')) {
+                              const currentDir = dirname(fileURLToPath(import.meta.url));
+                              filePath = resolve(currentDir, url);
+                          } else {
+                              filePath = url;
+                          }
+
+                          console.log('DEBUG: readAsync Node.js file read:', { url, filePath });
+
+                          console.log('DEBUG: readAsync Node.js file read:', { url, filePath });
+
+                          console.log('DEBUG: Node.js file read attempt:', { url, filePath });
+
+                          const data = await readFile(filePath);
+                          console.log('DEBUG: File read successful, size:', data.length);
+                          return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+                      } catch (error) {
+                          console.log('DEBUG: File read failed:', error.message);
+                          throw new Error(`File read error: ${url} - ${error.message}`);
+                      }
+                  } else {
+                      // Browser environment
+                      var response = await fetch(url, {
+                          credentials: "same-origin"
+                      });
+                      if (response.ok) {
+                          return response.arrayBuffer()
+                      }
+                      throw new Error(response.status + " : " + response.url)
                   }
-                  throw new Error(response.status + " : " + response.url)
               }
           }
-      } else {}
+      } else {
+          // Node.js environment
+          if (ENVIRONMENT_IS_NODE) {
+              readAsync = async url => {
+                  try {
+                      const { readFile } = await import('fs/promises');
+                      const { fileURLToPath } = await import('url');
+                      const { resolve, dirname } = await import('path');
+
+                      let filePath;
+                      if (url.startsWith('file://')) {
+                          filePath = fileURLToPath(url);
+                      } else if (url.startsWith('./') || url.startsWith('../')) {
+                          const currentDir = dirname(fileURLToPath(import.meta.url));
+                          filePath = resolve(currentDir, url);
+                      } else {
+                          filePath = url;
+                      }
+
+                      const data = await readFile(filePath);
+                      return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+                  } catch (error) {
+                      throw new Error(`File read error: ${url} - ${error.message}`);
+                  }
+              };
+
+              // We'll set readBinary to null for now since we have readAsync
+              readBinary = null;
+          }
+      }
       var out = Module["print"] || console.log.bind(console);
       var err = Module["printErr"] || console.error.bind(console);
       Object.assign(Module, moduleOverrides);
@@ -328,7 +443,34 @@ var Swisseph = ( () => {
       var dataURIPrefix = "data:application/octet-stream;base64,";
       var isDataURI = filename => filename.startsWith(dataURIPrefix);
       function findWasmBinary() {
-          var f = import.meta.resolve("./swisseph.wasm");
+          var f;
+          if (ENVIRONMENT_IS_NODE) {
+              // In Node.js, resolve relative to the current module
+              f = new URL("./swisseph.wasm", import.meta.url).href;
+          } else {
+              // In browser, try different approaches for different bundlers
+              if (import.meta.resolve) {
+                  try {
+                      f = import.meta.resolve("./swisseph.wasm");
+                  } catch (e) {
+                      // Fallback for bundlers that don't support import.meta.resolve
+                      f = "./swisseph.wasm";
+                  }
+              } else {
+                  // Fallback for older browsers or bundlers
+                  f = "./swisseph.wasm";
+              }
+
+              // For Vite and other dev servers, try to use a more reliable path
+              if (typeof window !== 'undefined' && window.location) {
+                  const currentPath = window.location.pathname;
+                  if (currentPath.includes('node_modules')) {
+                      // We're likely in a dev environment, use relative path
+                      f = "./swisseph.wasm";
+                  }
+              }
+          }
+
           if (!isDataURI(f)) {
               return locateFile(f)
           }
@@ -339,9 +481,11 @@ var Swisseph = ( () => {
           if (file == wasmBinaryFile && wasmBinary) {
               return new Uint8Array(wasmBinary)
           }
+
           if (readBinary) {
               return readBinary(file)
           }
+
           throw "both async and sync fetching of the wasm failed"
       }
       async function getWasmBinary(binaryFile) {
@@ -349,7 +493,9 @@ var Swisseph = ( () => {
               try {
                   var response = await readAsync(binaryFile);
                   return new Uint8Array(response)
-              } catch {}
+              } catch (error) {
+                  // Fall back to sync loading
+              }
           }
           return getBinarySync(binaryFile)
       }
@@ -364,7 +510,7 @@ var Swisseph = ( () => {
           }
       }
       async function instantiateAsync(binary, binaryFile, imports) {
-          if (!binary && typeof WebAssembly.instantiateStreaming == "function" && !isDataURI(binaryFile) && typeof fetch == "function") {
+          if (!binary && typeof WebAssembly.instantiateStreaming == "function" && !isDataURI(binaryFile) && !ENVIRONMENT_IS_NODE && typeof fetch == "function") {
               try {
                   var response = fetch(binaryFile, {
                       credentials: "same-origin"
