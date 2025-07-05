@@ -110,8 +110,14 @@
             <div id="tab-content-birth" class="tab-content hidden">
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <h2 class="text-2xl font-bold mb-4 text-gray-800">🎂 Birth Chart Calculator</h2>
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                        <p class="text-sm text-green-800">
+                            <strong>💡 Tip:</strong> Birth location (latitude/longitude) is essential for accurate house calculations and local time corrections.
+                            Default coordinates are set to Nepal (27.8667°N, 84.9167°E) with Nepal Standard Time (+5.75 UTC).
+                        </p>
+                    </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Birth Date</label>
                             <input type="date" id="birth-date" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
@@ -122,13 +128,38 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Timezone Offset (hours from UTC)</label>
-                            <input type="number" id="birth-timezone" value="0" min="-12" max="12" step="0.5" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <input type="number" id="birth-timezone" value="5.75" min="-12" max="12" step="0.25" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Birth Latitude</label>
+                            <input type="number" id="birth-latitude" value="27.8667" step="0.0001" min="-90" max="90" placeholder="e.g. 27.8667 (Nepal)" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Birth Longitude</label>
+                            <input type="number" id="birth-longitude" value="84.9167" step="0.0001" min="-180" max="180" placeholder="e.g. 84.9167 (Nepal)" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Coordinate System</label>
-                            <select id="birth-system" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <select id="birth-system" onchange="toggleAyanamsa('birth')" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                 <option value="tropical">Tropical</option>
-                                <option value="sidereal">Sidereal (Lahiri)</option>
+                                <option value="sidereal">Sidereal</option>
+                            </select>
+                        </div>
+                        <div id="birth-ayanamsa-container" class="hidden">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Ayanamsa</label>
+                            <select id="birth-ayanamsa" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="0">Fagan/Bradley</option>
+                                <option value="1" selected>Lahiri</option>
+                                <option value="2">De Luce</option>
+                                <option value="3">Raman</option>
+                                <option value="4">Ushashashi</option>
+                                <option value="5">Krishnamurti</option>
+                                <option value="6">Djwhal Khul</option>
+                                <option value="7">Yukteshwar</option>
+                                <option value="8">J.N. Bhasin</option>
+                                <option value="21">Galactic Center (Gil Brand)</option>
+                                <option value="27">True Chitra</option>
+                                <option value="28">True Revati</option>
                             </select>
                         </div>
                     </div>
@@ -151,7 +182,7 @@
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <h2 class="text-2xl font-bold mb-4 text-gray-800">⚖️ Sidereal vs Tropical Comparison</h2>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
                             <input type="date" id="compare-date" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
@@ -170,6 +201,26 @@
                                 <option value="4">Mars ♂</option>
                                 <option value="5">Jupiter ♃</option>
                                 <option value="6">Saturn ♄</option>
+                                <option value="7">Uranus ♅</option>
+                                <option value="8">Neptune ♆</option>
+                                <option value="9">Pluto ♇</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Ayanamsa</label>
+                            <select id="compare-ayanamsa" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="0">Fagan/Bradley</option>
+                                <option value="1" selected>Lahiri</option>
+                                <option value="2">De Luce</option>
+                                <option value="3">Raman</option>
+                                <option value="4">Ushashashi</option>
+                                <option value="5">Krishnamurti</option>
+                                <option value="6">Djwhal Khul</option>
+                                <option value="7">Yukteshwar</option>
+                                <option value="8">J.N. Bhasin</option>
+                                <option value="21">Galactic Center (Gil Brand)</option>
+                                <option value="27">True Chitra</option>
+                                <option value="28">True Revati</option>
                             </select>
                         </div>
                     </div>
@@ -295,11 +346,11 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Latitude</label>
-                            <input type="number" id="houses-lat" value="51.5074" step="0.0001" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <input type="number" id="houses-lat" value="27.7172" step="0.0001" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Longitude</label>
-                            <input type="number" id="houses-lon" value="-0.1278" step="0.0001" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <input type="number" id="houses-lon" value="85.3240" step="0.0001" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                     </div>
 
@@ -546,6 +597,18 @@
             return `${degree.toFixed(2)}° ${zodiacSigns[sign]}`;
         }
 
+        // Toggle ayanamsa visibility
+        window.toggleAyanamsa = function(prefix) {
+            const systemSelect = document.getElementById(`${prefix}-system`);
+            const ayanamsaContainer = document.getElementById(`${prefix}-ayanamsa-container`);
+
+            if (systemSelect.value === 'sidereal') {
+                ayanamsaContainer.classList.remove('hidden');
+            } else {
+                ayanamsaContainer.classList.add('hidden');
+            }
+        };
+
         // Calculate current positions
         window.calculateCurrentPositions = async function() {
             if (!initialized) return;
@@ -591,11 +654,13 @@
         // Calculate birth chart
         window.calculateBirthChart = async function() {
             if (!initialized) return;
-            
+
             try {
                 const date = document.getElementById('birth-date').value;
                 const time = document.getElementById('birth-time').value;
                 const timezone = parseFloat(document.getElementById('birth-timezone').value);
+                const latitude = parseFloat(document.getElementById('birth-latitude').value);
+                const longitude = parseFloat(document.getElementById('birth-longitude').value);
                 const system = document.getElementById('birth-system').value;
 
                 if (!date || !time) {
@@ -603,15 +668,21 @@
                     return;
                 }
 
+                if (isNaN(latitude) || isNaN(longitude)) {
+                    showError('Please enter valid latitude and longitude');
+                    return;
+                }
+
                 const [year, month, day] = date.split('-').map(Number);
                 const [hour, minute] = time.split(':').map(Number);
-                
+
                 const utcHour = hour + minute / 60 - timezone;
                 const jd = swe.julday(year, month, day, utcHour);
 
                 // Set sidereal mode if needed
                 if (system === 'sidereal') {
-                    swe.set_sid_mode(swe.SE_SIDM_LAHIRI, 0, 0);
+                    const ayanamsa = parseInt(document.getElementById('birth-ayanamsa').value);
+                    swe.set_sid_mode(ayanamsa, 0, 0);
                 }
 
                 const flags = system === 'sidereal' ? 
@@ -638,8 +709,8 @@
                     planetsContainer.appendChild(planetCard);
                 }
 
-                document.getElementById('birth-info').textContent = 
-                    `Birth Chart (${system}): ${date} ${time} UTC${timezone >= 0 ? '+' : ''}${timezone} (JD: ${jd.toFixed(6)})`;
+                document.getElementById('birth-info').textContent =
+                    `Birth Chart (${system}): ${date} ${time} UTC${timezone >= 0 ? '+' : ''}${timezone} | Location: ${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E (JD: ${jd.toFixed(6)})`;
                 document.getElementById('birth-results').classList.remove('hidden');
 
             } catch (error) {
@@ -670,9 +741,10 @@
                 const tropical = swe.calc_ut(jd, planetId, swe.SEFLG_SWIEPH);
 
                 // Sidereal position
-                swe.set_sid_mode(swe.SE_SIDM_LAHIRI, 0, 0);
+                const ayanamsa = parseInt(document.getElementById('compare-ayanamsa').value);
+                swe.set_sid_mode(ayanamsa, 0, 0);
                 const sidereal = swe.calc_ut(jd, planetId, swe.SEFLG_SWIEPH | swe.SEFLG_SIDEREAL);
-                const ayanamsa = swe.get_ayanamsa(jd);
+                const ayanamsaValue = swe.get_ayanamsa(jd);
 
                 document.getElementById('tropical-result').innerHTML = `
                     <p class="font-bold">${formatPosition(tropical[0])}</p>
@@ -684,7 +756,7 @@
                     <p class="text-sm text-gray-600">${sidereal[0].toFixed(6)}°</p>
                 `;
 
-                document.getElementById('ayanamsa-value').textContent = `${ayanamsa.toFixed(6)}°`;
+                document.getElementById('ayanamsa-value').textContent = `${ayanamsaValue.toFixed(6)}°`;
                 document.getElementById('difference-value').textContent = `${(tropical[0] - sidereal[0]).toFixed(6)}°`;
                 document.getElementById('julian-day-value').textContent = jd.toFixed(6);
 
