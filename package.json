@@ -53,12 +53,12 @@
   "license": "GPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prolaxu/swiss-wasm.git"
+    "url": "git+https://github.com/prolaxu/swisseph-wasm.git"
   },
   "bugs": {
-    "url": "https://github.com/prolaxu/swiss-wasm/issues"
+    "url": "https://github.com/prolaxu/swisseph-wasm/issues"
   },
-  "homepage": "https://github.com/prolaxu/swiss-wasm#readme",
+  "homepage": "https://github.com/prolaxu/swisseph-wasm#readme",
   "engines": {
     "node": ">=14.0.0"
   },

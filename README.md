@@ -18,7 +18,7 @@ A high-precision JavaScript wrapper for the Swiss Ephemeris WebAssembly module, 
 
 ## 🚀 Live Demo
 
-**Try it now**: [Interactive SwissEph Demo](https://prolaxu.github.io/swiss-wasm/examples/demo.html)
+**Try it now**: [Interactive SwissEph Demo](https://prolaxu.github.io/swisseph-wasm/examples/demo.html)
 
 Experience all features including:
 - 🌍 Real-time planetary positions
@@ -66,7 +66,7 @@ pnpm add swisseph-wasm
 
 ## 🚀 Quick Start
 
-> **👀 Want to see it in action first?** Try the [Interactive Demo](https://prolaxu.github.io/swiss-wasm/examples/demo.html)
+> **👀 Want to see it in action first?** Try the [Interactive Demo](https://prolaxu.github.io/swisseph-wasm/examples/demo.html)
 
 ### Basic Usage
 
@@ -500,7 +500,7 @@ import SwissEph from 'swisseph-wasm';
 
 ## 💡 Examples
 
-> **🌟 Interactive Examples**: Try all these examples and more in the [Live Demo](https://prolaxu.github.io/swiss-wasm/examples/demo.html)
+> **🌟 Interactive Examples**: Try all these examples and more in the [Live Demo](https://prolaxu.github.io/swisseph-wasm/examples/demo.html)
 
 ### Current Planetary Positions
 ```javascript
