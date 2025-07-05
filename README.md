@@ -16,6 +16,12 @@ A high-precision JavaScript wrapper for the Swiss Ephemeris WebAssembly module, 
 - **🏢 Professional Grade**: Suitable for commercial applications
 - **🔄 CDN Ready**: Available via jsdelivr CDN for quick prototyping
 
+---
+
+**☕ Enjoying this project?** [Support development on Ko-fi](https://ko-fi.com/prolaxu) to help keep it free and actively maintained!
+
+---
+
 ## 🚀 Live Demo
 
 **Try it now**: [Interactive SwissEph Demo](https://prolaxu.github.io/swisseph-wasm/examples/demo.html)
