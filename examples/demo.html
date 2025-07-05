@@ -416,16 +416,22 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Function Category</label>
+                            <select id="api-category" onchange="updateFunctionList()" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-2">
+                                <option value="basic">🌟 Basic Calculations</option>
+                                <option value="time">⏰ Time Functions</option>
+                                <option value="houses">🏠 Houses & Angles</option>
+                                <option value="ayanamsa">🔮 Ayanamsa & Sidereal</option>
+                                <option value="eclipse">🌑 Eclipses & Occultations</option>
+                                <option value="stars">⭐ Fixed Stars</option>
+                                <option value="phenomena">🌙 Phenomena & Visibility</option>
+                                <option value="coordinates">📐 Coordinate Transformations</option>
+                                <option value="utility">🔧 Utility Functions</option>
+                                <option value="advanced">🚀 Advanced Features</option>
+                            </select>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Function</label>
                             <select id="api-function" onchange="updateApiParams()" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="calc_ut">calc_ut - Calculate planet position</option>
-                                <option value="julday">julday - Convert to Julian Day</option>
-                                <option value="revjul">revjul - Convert from Julian Day</option>
-                                <option value="sidtime">sidtime - Sidereal time</option>
-                                <option value="deltat">deltat - Delta T</option>
-                                <option value="get_ayanamsa">get_ayanamsa - Ayanamsa value</option>
-                                <option value="houses">houses - Calculate houses</option>
-                                <option value="version">version - Get version</option>
+                                <!-- Functions will be populated by JavaScript -->
                             </select>
                         </div>
                         <div>
@@ -977,23 +983,146 @@
             }
         };
 
-        // API Explorer functions
+        // API Explorer functions - Complete function database
+        const swissEphFunctions = {
+            basic: {
+                'calc_ut': { params: '[2460218.5, 0, 2]', desc: 'Calculate planet position (UT)' },
+                'calc': { params: '[2460218.5, 0, 2]', desc: 'Calculate planet position (ET)' },
+                'get_planet_name': { params: '[0]', desc: 'Get planet name by ID' },
+                'pheno': { params: '[2460218.5, 0, 2]', desc: 'Planetary phenomena (ET)' },
+                'pheno_ut': { params: '[2460218.5, 0, 2]', desc: 'Planetary phenomena (UT)' },
+                'version': { params: '[]', desc: 'Get Swiss Ephemeris version' }
+            },
+            time: {
+                'julday': { params: '[2023, 6, 15, 12.0]', desc: 'Convert to Julian Day' },
+                'revjul': { params: '[2460218.5, 1]', desc: 'Convert from Julian Day' },
+                'sidtime': { params: '[2460218.5]', desc: 'Sidereal time' },
+                'sidtime0': { params: '[2460218.5, 23.4, 0]', desc: 'Sidereal time with obliquity' },
+                'deltat': { params: '[2460218.5]', desc: 'Delta T (ET-UT)' },
+                'time_equ': { params: '[2460218.5]', desc: 'Equation of time' },
+                'day_of_week': { params: '[2460218.5]', desc: 'Day of week (0=Monday)' },
+                'date_conversion': { params: '[2023, 6, 15, 12, 1]', desc: 'Date conversion' },
+                'utc_to_jd': { params: '[2023, 6, 15, 12, 0, 0, 1]', desc: 'UTC to Julian Day' },
+                'jdet_to_utc': { params: '[2460218.5, 1]', desc: 'JD (ET) to UTC' },
+                'jdut1_to_utc': { params: '[2460218.5, 1]', desc: 'JD (UT1) to UTC' },
+                'utc_time_zone': { params: '[2023, 6, 15, 12, 0, 0, 5.5]', desc: 'UTC with timezone' }
+            },
+            houses: {
+                'houses': { params: '[2460218.5, 51.5074, -0.1278, "P"]', desc: 'Calculate houses' },
+                'houses_ex': { params: '[2460218.5, 2, 51.5074, -0.1278, "P"]', desc: 'Houses with flags' },
+                'houses_ex2': { params: '[2460218.5, 2, 51.5074, -0.1278, "P"]', desc: 'Houses extended' },
+                'houses_armc': { params: '[180, 51.5074, 23.4, "P"]', desc: 'Houses from ARMC' },
+                'houses_armc_ex2': { params: '[180, 51.5074, 23.4, "P"]', desc: 'Houses ARMC extended' },
+                'house_pos': { params: '[180, 51.5074, 23.4, "P", 120, 0]', desc: 'House position of point' }
+            },
+            ayanamsa: {
+                'get_ayanamsa': { params: '[2460218.5]', desc: 'Get ayanamsa value' },
+                'get_ayanamsa_ut': { params: '[2460218.5]', desc: 'Get ayanamsa (UT)' },
+                'get_ayanamsa_ex': { params: '[2460218.5, 2]', desc: 'Get ayanamsa extended' },
+                'get_ayanamsa_ex_ut': { params: '[2460218.5, 2]', desc: 'Get ayanamsa extended (UT)' },
+                'get_ayanamsa_name': { params: '[1]', desc: 'Get ayanamsa name' },
+                'set_sid_mode': { params: '[1, 0, 0]', desc: 'Set sidereal mode' }
+            },
+            eclipse: {
+                'sol_eclipse_when_glob': { params: '[2460218.5, 2, 0, 0]', desc: 'Next solar eclipse globally' },
+                'sol_eclipse_when_loc': { params: '[2460218.5, 2, -0.1278, 51.5074, 0, 0]', desc: 'Solar eclipse at location' },
+                'sol_eclipse_where': { params: '[2460218.5, 2]', desc: 'Solar eclipse visibility' },
+                'sol_eclipse_how': { params: '[2460218.5, 2, -0.1278, 51.5074, 0]', desc: 'Solar eclipse magnitude' },
+                'lun_eclipse_when': { params: '[2460218.5, 2, 0, 0]', desc: 'Next lunar eclipse' },
+                'lun_eclipse_when_loc': { params: '[2460218.5, 2, -0.1278, 51.5074, 0, 0]', desc: 'Lunar eclipse at location' },
+                'lun_eclipse_how': { params: '[2460218.5, 2, -0.1278, 51.5074, 0]', desc: 'Lunar eclipse magnitude' },
+                'lun_occult_when_glob': { params: '[2460218.5, 1, "", 2, 0, 0]', desc: 'Lunar occultation globally' },
+                'lun_occult_when_loc': { params: '[2460218.5, 1, "", 2, -0.1278, 51.5074, 0, 0]', desc: 'Lunar occultation locally' },
+                'lun_occult_where': { params: '[2460218.5, 1, "", 2]', desc: 'Lunar occultation visibility' }
+            },
+            stars: {
+                'fixstar': { params: '["Sirius", 2460218.5, 2]', desc: 'Fixed star position' },
+                'fixstar2': { params: '["Sirius", 2460218.5, 2]', desc: 'Fixed star position v2' },
+                'fixstar2_ut': { params: '["Sirius", 2460218.5, 2]', desc: 'Fixed star position v2 (UT)' },
+                'fixstar_mag': { params: '["Sirius"]', desc: 'Fixed star magnitude' },
+                'fixstar2_mag': { params: '["Sirius"]', desc: 'Fixed star magnitude v2' }
+            },
+            phenomena: {
+                'rise_trans': { params: '[2460218.5, 0, -0.1278, 51.5074, 0, 1]', desc: 'Rise/transit/set times' },
+                'rise_trans_true_hor': { params: '[2460218.5, 0, -0.1278, 51.5074, 0, 1]', desc: 'Rise/set true horizon' },
+                'azal': { params: '[2460218.5, 51.5074, -0.1278, 0, 0]', desc: 'Azimuth/altitude' },
+                'azal_rev': { params: '[2460218.5, 51.5074, -0.1278, 0, 0]', desc: 'Reverse azimuth/altitude' },
+                'heliacal_ut': { params: '[2460218.5, [51.5074, -0.1278, 0], [1013, 15, 40, 0.25], [1.8, 25, 1, 1, 1, 1], "Venus", 1, 0]', desc: 'Heliacal phenomena' },
+                'heliacal_pheno_ut': { params: '[2460218.5, [51.5074, -0.1278, 0], [1013, 15, 40, 0.25], [1.8, 25, 1, 1, 1, 1], "Venus", 1, 0]', desc: 'Heliacal phenomena details' },
+                'vis_limit_mag': { params: '[2460218.5, [51.5074, -0.1278, 0], [1013, 15, 40, 0.25], [1.8, 25, 1, 1, 1, 1], "Venus", 0]', desc: 'Visibility limit magnitude' }
+            },
+            coordinates: {
+                'cotrans': { params: '[[120, 30, 1], 23.4]', desc: 'Coordinate transformation' },
+                'cotrans_sp': { params: '[[120, 30, 1], 23.4]', desc: 'Coordinate transformation with speed' },
+                'refrac': { params: '[2460218.5, 51.5074, -0.1278, 0, 1013, 15]', desc: 'Atmospheric refraction' },
+                'refrac_extended': { params: '[2460218.5, 51.5074, -0.1278, 0, 1013, 15, 1]', desc: 'Extended refraction' }
+            },
+            utility: {
+                'degnorm': { params: '[390]', desc: 'Normalize degrees (0-360)' },
+                'radnorm': { params: '[7]', desc: 'Normalize radians (0-2π)' },
+                'deg_midp': { params: '[10, 350]', desc: 'Midpoint in degrees' },
+                'rad_midp': { params: '[0.1, 6.1]', desc: 'Midpoint in radians' },
+                'difdegn': { params: '[10, 350]', desc: 'Degree difference normalized' },
+                'difdeg2n': { params: '[10, 350]', desc: 'Degree difference 2π normalized' },
+                'difrad2n': { params: '[0.1, 6.1]', desc: 'Radian difference 2π normalized' },
+                'difcsn': { params: '[10, 350]', desc: 'Centisecond difference normalized' },
+                'difcs2n': { params: '[10, 350]', desc: 'Centisecond difference 2π normalized' },
+                'csnorm': { params: '[390000]', desc: 'Normalize centiseconds' },
+                'csroundsec': { params: '[123456]', desc: 'Round centiseconds to seconds' },
+                'd2l': { params: '[123.456]', desc: 'Double to long conversion' },
+                'split_deg': { params: '[123.456789, 0]', desc: 'Split degrees to D°M\'S"' },
+                'cs2timestr': { params: '[123456, 58, 0]', desc: 'Centiseconds to time string' },
+                'cs2lonlatstr': { params: '[123456, "E", "W"]', desc: 'Centiseconds to lon/lat string' },
+                'cs2degstr': { params: '[123456]', desc: 'Centiseconds to degree string' }
+            },
+            advanced: {
+                'nod_aps': { params: '[2460218.5, 0, 2, 0]', desc: 'Nodes and apsides' },
+                'nod_aps_ut': { params: '[2460218.5, 0, 2, 0]', desc: 'Nodes and apsides (UT)' },
+                'get_orbital_elements': { params: '[2460218.5, 0, 2]', desc: 'Orbital elements' },
+                'orbit_max_min_true_distance': { params: '[2460218.5, 0, 2]', desc: 'Orbital distances' },
+                'set_ephe_path': { params: '["/path/to/ephemeris"]', desc: 'Set ephemeris path' },
+                'set_jpl_file': { params: '["de431.eph"]', desc: 'Set JPL ephemeris file' },
+                'set_topo': { params: '[-0.1278, 51.5074, 0]', desc: 'Set topocentric location' },
+                'set_tid_acc': { params: '[23.8946]', desc: 'Set tidal acceleration' },
+                'get_tid_acc': { params: '[]', desc: 'Get tidal acceleration' },
+                'set_lapse_rate': { params: '[0.0065]', desc: 'Set atmospheric lapse rate' },
+                'close': { params: '[]', desc: 'Close Swiss Ephemeris' }
+            }
+        };
+
+        window.updateFunctionList = function() {
+            const category = document.getElementById('api-category').value;
+            const functionSelect = document.getElementById('api-function');
+
+            functionSelect.innerHTML = '';
+
+            const functions = swissEphFunctions[category] || {};
+            for (const [funcName, funcData] of Object.entries(functions)) {
+                const option = document.createElement('option');
+                option.value = funcName;
+                option.textContent = `${funcName} - ${funcData.desc}`;
+                functionSelect.appendChild(option);
+            }
+
+            // Update parameters for first function
+            if (Object.keys(functions).length > 0) {
+                updateApiParams();
+            }
+        };
+
         window.updateApiParams = function() {
+            const category = document.getElementById('api-category').value;
             const func = document.getElementById('api-function').value;
             const paramsField = document.getElementById('api-params');
 
-            const examples = {
-                'calc_ut': '[2460218.5, 0, 2]',
-                'julday': '[2023, 6, 15, 12.0]',
-                'revjul': '[2460218.5, 1]',
-                'sidtime': '[2460218.5]',
-                'deltat': '[2460218.5]',
-                'get_ayanamsa': '[2460218.5]',
-                'houses': '[2460218.5, 51.5074, -0.1278, "P"]',
-                'version': '[]'
-            };
+            const functions = swissEphFunctions[category] || {};
+            const funcData = functions[func];
 
-            paramsField.value = examples[func] || '[]';
+            if (funcData) {
+                paramsField.value = funcData.params;
+            } else {
+                paramsField.value = '[]';
+            }
         };
 
         window.executeApiCall = function() {
@@ -1005,41 +1134,45 @@
                 const params = JSON.parse(paramsStr);
 
                 let result;
-                switch (func) {
-                    case 'calc_ut':
-                        result = swe.calc_ut(...params);
-                        break;
-                    case 'julday':
-                        result = swe.julday(...params);
-                        break;
-                    case 'revjul':
-                        result = swe.revjul(...params);
-                        break;
-                    case 'sidtime':
-                        result = swe.sidtime(...params);
-                        break;
-                    case 'deltat':
-                        result = swe.deltat(...params);
-                        break;
-                    case 'get_ayanamsa':
-                        result = swe.get_ayanamsa(...params);
-                        break;
-                    case 'houses':
-                        result = swe.houses(...params);
-                        break;
-                    case 'version':
-                        result = swe.version();
-                        break;
-                    default:
-                        throw new Error('Unknown function');
+
+                // Check if the function exists on the swe object
+                if (typeof swe[func] === 'function') {
+                    result = swe[func](...params);
+                } else {
+                    throw new Error(`Function '${func}' not found in Swiss Ephemeris`);
                 }
 
-                document.getElementById('api-output').textContent = JSON.stringify(result, null, 2);
-                document.getElementById('api-code').textContent = `const result = swe.${func}(${paramsStr.slice(1, -1)});`;
+                // Format result for display
+                let displayResult;
+                if (Array.isArray(result)) {
+                    displayResult = result;
+                } else if (typeof result === 'object' && result !== null) {
+                    displayResult = result;
+                } else {
+                    displayResult = result;
+                }
+
+                document.getElementById('api-output').textContent = JSON.stringify(displayResult, null, 2);
+
+                // Generate code example
+                let codeExample;
+                if (params.length === 0) {
+                    codeExample = `const result = swe.${func}();`;
+                } else {
+                    const paramStr = params.map(p => {
+                        if (typeof p === 'string') return `"${p}"`;
+                        if (Array.isArray(p)) return JSON.stringify(p);
+                        return p;
+                    }).join(', ');
+                    codeExample = `const result = swe.${func}(${paramStr});`;
+                }
+
+                document.getElementById('api-code').textContent = codeExample;
                 document.getElementById('api-results').classList.remove('hidden');
 
             } catch (error) {
                 showError('API call failed: ' + error.message);
+                console.error('API Error:', error);
             }
         };
 
@@ -1256,6 +1389,9 @@
 
         // Initialize when page loads
         initSwissEph();
+
+        // Initialize API Explorer
+        updateFunctionList();
     </script>
 
     <style>
