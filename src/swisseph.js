@@ -1,3 +1,42 @@
+/**
+ * Swiss Ephemeris WebAssembly Library
+ *
+ * A high-precision astronomical calculation library for JavaScript,
+ * compiled from the renowned Swiss Ephemeris C library to WebAssembly.
+ *
+ * Features:
+ * - Planetary positions and velocities
+ * - House calculations
+ * - Time conversions (Julian Day, sidereal time)
+ * - Coordinate transformations
+ * - Eclipse and occultation calculations
+ * - Fixed star positions
+ * - And much more...
+ *
+ * @author prolaxu
+ * @version 0.0.2
+ * @license GPL-3.0-or-later
+ *
+ * IMPORTANT LICENSING INFORMATION:
+ *
+ * This library incorporates the Swiss Ephemeris, which is subject to dual licensing:
+ *
+ * 1. GNU General Public License (GPL) v2 or later
+ *    - Free for open source projects
+ *    - Requires derivative works to also be GPL licensed
+ *
+ * 2. Commercial License (from Astrodienst AG)
+ *    - Required for proprietary/commercial applications
+ *    - Contact: swisseph@astro.ch
+ *    - Website: https://www.astro.com/swisseph/
+ *
+ * For commercial use, you may need to obtain a commercial license for Swiss Ephemeris
+ * from Astrodienst AG. This WebAssembly wrapper is provided under GPL v3.
+ *
+ * The author is not affiliated with Astrodienst AG and cannot provide commercial
+ * licenses for Swiss Ephemeris.
+ */
+
 import WasamSwissEph from '../wsam/swisseph.js';
 
 class SwissEph {

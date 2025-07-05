@@ -622,6 +622,57 @@ This library is a wrapper around the Swiss Ephemeris, which is licensed under th
 - **Test Suite**: Comprehensive validation
 - **Documentation**: Complete developer guides
 
+## 📜 License & Important Legal Information
+
+### **📋 Project License**
+This project is licensed under **GPL-3.0-or-later** - see the [LICENSE](LICENSE) file for details.
+
+### **⚖️ Swiss Ephemeris Licensing**
+
+**IMPORTANT**: This library incorporates the Swiss Ephemeris, which uses a **dual licensing model**:
+
+#### **🆓 For Open Source Projects:**
+- ✅ **Free to use** under GNU General Public License (GPL)
+- ✅ Your project must also be **open source** (GPL compatible)
+- ✅ No additional licensing fees required
+
+#### **💼 For Commercial/Proprietary Projects:**
+- ⚠️ **Commercial license required** from Astrodienst AG
+- ⚠️ Cannot be used in closed-source applications without commercial license
+- ⚠️ Contact Astrodienst AG for pricing and terms
+
+### **📞 Commercial Licensing Contact**
+
+For commercial use of Swiss Ephemeris:
+
+**Astrodienst AG**
+📧 Email: swisseph@astro.ch
+🌐 Website: https://www.astro.com/swisseph/
+📍 Address: Dammstrasse 23, CH-8702 Zollikon, Switzerland
+
+### **🔍 License Compliance Guide**
+
+| Use Case | License Required | Action Needed |
+|----------|------------------|---------------|
+| 🆓 **Open Source Project** | GPL v3 | ✅ Use freely, keep project open source |
+| 💼 **Commercial Product** | Commercial License | ⚠️ Contact Astrodienst AG |
+| 🎓 **Educational/Research** | GPL v3 | ✅ Use freely for non-commercial purposes |
+| 🏢 **Internal Business Tools** | Commercial License | ⚠️ Contact Astrodienst AG |
+
+### **📚 Additional Resources**
+
+- 📖 [Swiss Ephemeris Official Documentation](https://www.astro.com/swisseph/)
+- ⚖️ [GPL v3 License Text](https://www.gnu.org/licenses/gpl-3.0.html)
+- 🏢 [Commercial Licensing Information](https://www.astro.com/swisseph/swephinfo_e.htm#_Toc46391649)
+
+### **⚠️ Disclaimer**
+
+The author of `swisseph-wasm` is not affiliated with Astrodienst AG and cannot provide commercial licenses for Swiss Ephemeris. This WebAssembly wrapper is provided "as is" under GPL v3. Users are responsible for ensuring compliance with Swiss Ephemeris licensing terms for their specific use case.
+
+## 🤝 Contributing
+
+We welcome contributions! Please feel free to submit a Pull Request.
+
 ---
 
 **Ready to calculate the cosmos? Start with the [Quick Reference](QUICK_REFERENCE.md) or dive into the [Complete Documentation](DOCUMENTATION.md)!** 🌟
